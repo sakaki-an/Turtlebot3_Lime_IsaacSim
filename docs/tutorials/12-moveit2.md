@@ -57,6 +57,8 @@ flowchart LR
        and the `positionCommand`, `velocityCommand` and `effortCommand` outputs to the same-named inputs.
     3. Press **Play**.
 
+    ![The ROS2_JointCommands graph](../assets/img/gui/12_joint_command_graph.png){ .full }
+
 === "Python (standalone)"
 
     ```bash

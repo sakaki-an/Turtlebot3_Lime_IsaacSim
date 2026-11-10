@@ -369,6 +369,128 @@ async def shot_05_keyboard_graph():
     await shot("05_keyboard_graph", crop=(40, 60, 1540, 820))
 
 
+async def graph_shot(graph_path, name):
+    """Open an Action Graph in a big floating editor window, frame all nodes, capture it."""
+    from omni.graph.window.action.action_graph_extension import ActionGraphExtension
+
+    ActionGraphExtension.show_graph([stage_utils.get_current_stage().GetPrimAtPath(graph_path)])
+    await frames(120)
+    win = ui.Workspace.get_window("Action Graph")
+    win.undock()
+    await frames(5)
+    win.position_x, win.position_y, win.width, win.height = 40, 60, 1500, 760
+    await frames(60)
+    await ui_test.emulate_mouse_move(ui_test.Vec2(800, 450))
+    await frames(5)
+    await ui_test.emulate_keyboard_press(carb.input.KeyboardInput.F)
+    await frames(60)
+    await shot(name, crop=(40, 60, 1540, 820))
+    win.visible = False
+    await frames(10)
+
+
+async def lime_room_scene(with_robot=True):
+    from common.scene import build_lime_room
+
+    stage_utils.create_new_stage(template="empty")
+    await frames(10)
+    build_lime_room(stage_utils.get_current_stage())
+    while stage_utils.is_stage_loading():
+        await frames(5)
+    if with_robot:
+        lime.add_lime("/World/turtlebot3_lime")
+    await frames(30)
+
+
+async def shot_07_odom_graph():
+    from common import graphs
+
+    app_utils.enable_extension("isaacsim.ros2.bridge")
+    await new_scene(LIME_USD, variant=False)
+    root = f"/World/turtlebot3_lime/{lime.ARTICULATION_ROOT}"
+    graphs.create_odom_tf_joint_states_graph(root)
+    await frames(10)
+    await graph_shot("/World/ROS2_OdomTF", "07_odom_tf_graph")
+
+
+async def shot_12_joint_command_graph():
+    from common import graphs
+
+    app_utils.enable_extension("isaacsim.ros2.bridge")
+    await new_scene(LIME_USD, variant=False)
+    graphs.create_joint_command_graph(f"/World/turtlebot3_lime/{lime.ARTICULATION_ROOT}")
+    await frames(10)
+    await graph_shot("/World/ROS2_JointCommands", "12_joint_command_graph")
+
+
+async def shot_08_camera_view():
+    from common import sensors
+    from omni.kit.viewport.utility import get_active_viewport
+
+    await lime_room_scene()
+    cam = sensors.add_d435_camera("/World/turtlebot3_lime")
+    await frames(10)
+    get_active_viewport().camera_path = cam
+    select(cam)
+    await frames(120)
+    await shot("08_camera_view")
+    get_active_viewport().camera_path = "/OmniverseKit_Persp"
+    await frames(10)
+
+
+async def shot_08_camera_graph_tool():
+    await lime_room_scene()
+    await ui_test.menu_click("Tools/Robotics/ROS 2 OmniGraphs/Camera")
+    await frames(90)
+    try:
+        await shot("08_camera_graph_tool")
+    finally:
+        ui.Workspace.show_window("ROS2 Camera Graph", False)
+        await frames(10)
+
+
+async def shot_09_lidar_viewport():
+    from common import sensors
+    from isaacsim.core.simulation_manager import SimulationManager
+    await lime_room_scene()
+    from common import graphs
+
+    app_utils.enable_extension("isaacsim.ros2.bridge")
+    lidar_path = sensors.add_lds_lidar("/World/turtlebot3_lime")
+    graphs.create_lidar_graph(lidar_path, show_debug_view=True)
+    ViewportManager.set_camera_view("/OmniverseKit_Persp", eye=(-1.4, -2.4, 3.2), target=(0.9, 0.0, 0.0))
+    SimulationManager.setup_simulation(dt=1.0 / 60.0)
+    app_utils.play()
+    await frames(240)
+    await shot("09_lidar_viewport")
+    app_utils.stop()
+    await frames(10)
+
+
+async def shot_11_occupancy_map():
+    await lime_room_scene(with_robot=False)
+    ViewportManager.set_camera_view("/OmniverseKit_Persp", eye=(1.0, -0.01, 9.0), target=(1.0, 0.0, 0.0))
+    await ui_test.menu_click("Tools/Robotics/Occupancy Map")
+    await frames(90)
+    fields = ui_test.find_all("Occupancy Map//Frame/**/FloatDrag[*]") or ui_test.find_all("Occupancy Map//Frame/**/FloatField[*]")
+    print(f"[gui] occupancy map fields: {len(fields)}", flush=True)
+    # widget order in the window: cell size, origin xyz, upper bound xyz, lower bound xyz (values of tutorial 11)
+    values = [0.05, 0.5, 0.0, 0.16, 3.7, 2.7, 0.0, -2.7, -2.7, 0.0]
+    for w, v in zip(fields, values):
+        w.model.set_value(v)
+        await frames(2)
+    await frames(20)
+    buttons = {b.widget.text.strip().lower(): b for b in ui_test.find_all("Occupancy Map//Frame/**/Button[*]") if b.widget.text}
+    print(f"[gui] occupancy map buttons: {sorted(buttons)}", flush=True)
+    await buttons["calculate"].click()
+    await frames(240)
+    await buttons["visualize image"].click()
+    await frames(120)
+    await shot("11_occupancy_map")
+    ui.Workspace.show_window("Occupancy Map Visualization", False)
+    await frames(10)
+
+
 SHOTS = [
     ("00_labels", dump_labels),
     ("00_node_names", print_node_ui_names),
@@ -379,6 +501,12 @@ SHOTS = [
     ("03_gain_tuner", shot_03_gain_tuner),
     ("05_keyboard_graph", shot_05_keyboard_graph),
     ("06_action_graph", shot_06_action_graph),
+    ("07_odom_graph", shot_07_odom_graph),
+    ("08_camera_view", shot_08_camera_view),
+    ("08_camera_graph_tool", shot_08_camera_graph_tool),
+    ("09_lidar_viewport", shot_09_lidar_viewport),
+    ("11_occupancy_map", shot_11_occupancy_map),
+    ("12_joint_command_graph", shot_12_joint_command_graph),
 ]
 
 

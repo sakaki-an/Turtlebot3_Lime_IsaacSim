@@ -49,7 +49,8 @@ graphs.create_camera_graph(sensors.add_d435_camera(robot_path))  # tutorial 08
 
 # --- NEW: LiDAR + IMU and their ROS 2 graphs --------------------------------------------------------------
 lidar_path = sensors.add_lds_lidar(robot_path)
-graphs.create_lidar_graph(lidar_path)
+# show_debug_view: with a window, the LiDAR helper also draws the hits as dots in the viewport
+graphs.create_lidar_graph(lidar_path, show_debug_view=not args.headless)
 imu_path = sensors.add_imu(robot_path)
 graphs.create_imu_graph(imu_path)
 
@@ -58,12 +59,6 @@ if args.record:
     from common.recorder import Recorder
 
     recorder = Recorder(args.record, eye=(-1.6, -1.8, 2.2), target=(0.4, 0.0, 0.0), every_n=3, fps=20)
-
-if not args.headless:
-    # With a window: draw the LiDAR hits as red points in the viewport (debug drawing, not in renders).
-    from isaacsim.sensors.experimental.rtx import Lidar, LidarSensor
-
-    LidarSensor(Lidar(lidar_path), annotators=[]).attach_writer("draw-point-cloud", size=0.03, color=[1.0, 0.2, 0.2, 1.0])
 
 SimulationManager.setup_simulation(dt=1.0 / 60.0)
 app_utils.play()

@@ -82,6 +82,8 @@ The clock and `/cmd_vel` graphs from [tutorial 06](06-ros2-drive.md) stay as the
        `jointVelocities`, `jointEfforts`, `jointDofTypes`, `stageMetersPerUnit`, and `execOut → execIn`.
     4. Press **Play**.
 
+    ![The ROS2_OdomTF graph](../assets/img/gui/07_odom_tf_graph.png){ .full }
+
     !!! tip "Shortcut"
         **Tools ▸ Robotics ▸ ROS 2 OmniGraphs ▸ Odometry Publisher** and **▸ Joint States** build similar graphs from a form.
 

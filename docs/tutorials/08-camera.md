@@ -64,8 +64,17 @@ All three use `frameId = camera_color_optical_frame`, so RViz and other ROS tool
        Name it `d435_color`. In **Property** set: *Transform ▸ Rotate* = (180, 0, 0), *Focal Length* = 15.1,
        *Horizontal Aperture* = 20.955, *Vertical Aperture* = 15.716, *Clipping Range* = (0.05, 20).
     3. Look through it: viewport camera menu (**Perspective ▾**) ▸ `d435_color`.
-    4. **Tools ▸ Robotics ▸ ROS 2 OmniGraphs ▸ Camera** builds the graph above from a form. Set the camera prim,
-       resolution 640 × 480, frame ID `camera_color_optical_frame`, and the topic names from the diagram.
+
+        ![Looking through the D435 camera](../assets/img/gui/08_camera_view.png){ .full }
+
+    4. **Tools ▸ Robotics ▸ ROS 2 OmniGraphs ▸ Camera** builds the graph above from a form. Its defaults
+       (*Camera Prim* `/OmniverseKit_Persp`, *Frame ID* `sim_camera`, topics `/rgb` and `/depth`) are placeholders:
+       set the camera prim to `d435_color`, the frame ID to `camera_color_optical_frame`, the RGB and depth topics
+       from the diagram, then **OK**. The form has no field for the camera_info topic (it uses `camera_info`): open the
+       created graph and set the `ROS2 Camera Info Helper` node's *topicName* to `/camera/camera/color/camera_info`.
+
+        ![Tools ▸ Robotics ▸ ROS 2 OmniGraphs ▸ Camera](../assets/img/gui/08_camera_graph_tool.png){ .full }
+
     5. Press **Play**.
 
 === "Python (standalone)"

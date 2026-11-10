@@ -227,7 +227,13 @@ def create_camera_graph(
 
 
 # --8<-- [start:create_lidar_graph]
-def create_lidar_graph(lidar_path: str, graph_path: str = "/World/ROS2_Lidar", topic: str = "/scan", frame_id: str = "base_scan"):
+def create_lidar_graph(
+    lidar_path: str,
+    graph_path: str = "/World/ROS2_Lidar",
+    topic: str = "/scan",
+    frame_id: str = "base_scan",
+    show_debug_view: bool = False,
+):
     """Tutorial 09: publish the RTX LiDAR as sensor_msgs/LaserScan."""
     import usdrt.Sdf
 
@@ -247,6 +253,7 @@ def create_lidar_graph(lidar_path: str, graph_path: str = "/World/ROS2_Lidar", t
                 ("PublishScan.inputs:topicName", topic),
                 ("PublishScan.inputs:frameId", frame_id),
                 ("PublishScan.inputs:fullScan", True),  # one message per full 360 deg revolution
+                ("PublishScan.inputs:showDebugView", show_debug_view),  # draw the hits in the viewport (GUI only)
             ],
             keys.CONNECT: [
                 ("OnPlaybackTick.outputs:tick", "RenderProduct.inputs:execIn"),

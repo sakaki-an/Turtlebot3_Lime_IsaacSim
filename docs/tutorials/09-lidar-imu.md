@@ -56,7 +56,12 @@ flowchart LR
     5. Build the IMU graph by hand (Action Graph editor): `On Playback Tick` → `Isaac Read IMU Node`
        (*imuPrim* = the IMU, *readGravity* ✓) → `ROS2 Publish Imu` (*topicName* `/imu`, *frameId* `imu_link`). Connect
        `linAcc → linearAcceleration`, `angVel → angularVelocity`, `orientation → orientation`, and the simulation time to *timeStamp*.
-    6. Press **Play**. With a window, the script also draws the LiDAR hits as red points in the viewport.
+    6. To *see* the LiDAR in the viewport, tick **showDebugView** on the `ROS2 RTX Lidar Helper` node. Press **Play**:
+
+        ![LiDAR hits drawn in the viewport (showDebugView)](../assets/img/gui/09_lidar_viewport.png){ .full }
+
+        The dots sit on the walls, the obstacles and the bottle. The cup, bowl and banana are lower than the
+        scan plane (16 cm), so the LiDAR cannot see them. Nav2 can't either (tutorial 11).
 
 === "Python (standalone)"
 
@@ -67,7 +72,7 @@ flowchart LR
 
     ```python
     lidar_path = sensors.add_lds_lidar(robot_path)   # RTX LiDAR at base_scan, LDS-01 numbers
-    graphs.create_lidar_graph(lidar_path)            # -> /scan
+    graphs.create_lidar_graph(lidar_path, show_debug_view=not args.headless)   # -> /scan (+ dots in the viewport)
     imu_path = sensors.add_imu(robot_path)           # physics IMU on base_link
     graphs.create_imu_graph(imu_path)                # -> /imu
     ```
