@@ -18,5 +18,7 @@ This project is released under the **Apache License 2.0** (see `LICENSE` and `NO
 - `turtlebot3_lime.urdf.xacro`: removed the Gazebo-classic plugins (not available on Jazzy) and the
   real-hardware `ros2_control` block. The robot geometry is unchanged.
 - `package.xml`: declared the missing dependency on `realsense2_description`.
+- `turtlebot3_lime.srdf`: the `home` pose used `joint3 = 1.87`, outside the URDF joint limit (1.8567).
+  It now uses 1.85, so MoveIt accepts it as a start state.
 
 Every modified file says so in its header.

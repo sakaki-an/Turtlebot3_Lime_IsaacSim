@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!-- TurtleBot3 Lime + a ros2_control block that talks to Isaac Sim over two topics:
+       /isaac_joint_states    (sensor_msgs/JointState, published by Isaac Sim)  -> state interfaces
+       /isaac_joint_commands  (sensor_msgs/JointState, subscribed by Isaac Sim) <- command interfaces
+     Hardware plugin: joint_state_topic_hardware_interface/JointStateTopicSystem
+     (the Jazzy successor of topic_based_ros2_control/TopicBasedSystem). -->
+<robot name="turtlebot3_lime" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find turtlebot3_lime_description)/urdf/turtlebot3_lime.urdf.xacro" />
+
+  <!-- Isaac Sim's JointState messages carry position, velocity AND effort. JointStateTopicSystem
+       copies every field it receives into a state interface, so all three must be declared
+       (otherwise: "The requested state interface not found: '<joint>/effort'"). -->
+  <xacro:macro name="position_joint" params="name">
+    <joint name="${name}">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="state_only_joint" params="name">
+    <joint name="${name}">
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Two hardware components that both read /isaac_joint_states:
+       * IsaacArm writes /isaac_joint_commands for the joints it commands (arm + gripper).
+       * IsaacWheels only reads the wheel states (Isaac Sim drives the wheels from /cmd_vel).
+       Why two? A component publishes ONE JointState command message containing the names of all its
+       joints but positions only for joints with a position command interface. If the state-only wheels
+       were in the same component, names (9) and positions (7) would not match, and Isaac Sim's
+       "ROS2 Subscribe Joint State" node drops such messages ("Please ensure size of position, velocity
+       and effort arrays match the number of actuators").
+       joint_state_broadcaster still publishes ALL joints of both components on /joint_states.
+       gripper_right_joint is not listed: it is a URDF mimic joint; robot_state_publisher computes it. -->
+  <ros2_control name="IsaacArm" type="system">
+    <hardware>
+      <plugin>joint_state_topic_hardware_interface/JointStateTopicSystem</plugin>
+      <param name="joint_states_topic">/isaac_joint_states</param>
+      <param name="joint_commands_topic">/isaac_joint_commands</param>
+      <param name="sum_wrapped_joint_states">false</param>
+    </hardware>
+    <xacro:position_joint name="joint1"/>
+    <xacro:position_joint name="joint2"/>
+    <xacro:position_joint name="joint3"/>
+    <xacro:position_joint name="joint4"/>
+    <xacro:position_joint name="joint5"/>
+    <xacro:position_joint name="joint6"/>
+    <xacro:position_joint name="gripper_left_joint"/>
+  </ros2_control>
+
+  <ros2_control name="IsaacWheels" type="system">
+    <hardware>
+      <plugin>joint_state_topic_hardware_interface/JointStateTopicSystem</plugin>
+      <param name="joint_states_topic">/isaac_joint_states</param>
+      <param name="joint_commands_topic">/isaac_wheel_commands_unused</param>
+      <param name="sum_wrapped_joint_states">false</param>
+    </hardware>
+    <xacro:state_only_joint name="wheel_left_joint"/>
+    <xacro:state_only_joint name="wheel_right_joint"/>
+  </ros2_control>
+
+</robot>

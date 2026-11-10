@@ -1,0 +1,37 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 60  # Hz, same as Isaac Sim's /isaac_joint_states
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    gripper_controller:
+      type: position_controllers/GripperActionController
+
+arm_controller:
+  ros__parameters:
+    joints: [joint1, joint2, joint3, joint4, joint5, joint6]
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+    allow_partial_joints_goal: true
+    # Goal tolerances: without them the controller reports SUCCESS when the trajectory TIME is over,
+    # even if the simulated arm never moved. With them, a failed motion is reported as failed.
+    constraints:
+      stopped_velocity_tolerance: 0.05
+      goal_time: 2.0
+      joint1: {goal: 0.05}
+      joint2: {goal: 0.05}
+      joint3: {goal: 0.05}
+      joint4: {goal: 0.05}
+      joint5: {goal: 0.05}
+      joint6: {goal: 0.05}
+
+gripper_controller:
+  ros__parameters:
+    joint: gripper_left_joint
+    goal_tolerance: 0.002
+    # "Stalled" = not moving for stall_timeout seconds, e.g. fingers blocked by a grasped object.
+    # allow_stalling: true reports such a grasp as success.
+    allow_stalling: true
+    stall_velocity_threshold: 0.0005
+    stall_timeout: 2.0

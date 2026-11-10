@@ -1,0 +1,16 @@
+# Joint limits for MoveIt's trajectory time-parameterization.
+# MoveIt 2 Jazzy's time-optimal parameterization (TOTG) REQUIRES acceleration limits; the vendored
+# turtlebot3_lime_moveit_config/config/joint_limits.yaml has none ("No acceleration limit was
+# defined for joint joint1!"), so this project uses its own copy with acceleration limits added.
+default_velocity_scaling_factor: 0.5
+default_acceleration_scaling_factor: 0.5
+
+joint_limits:
+  joint1: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  joint2: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  joint3: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  joint4: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  joint5: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  joint6: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  gripper_left_joint: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}
+  gripper_right_joint: {has_velocity_limits: true, max_velocity: 4.8, has_acceleration_limits: true, max_acceleration: 5.0}

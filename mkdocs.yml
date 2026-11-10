@@ -48,6 +48,8 @@ nav:
   - ROS 2:
       - Drive with /cmd_vel: tutorials/06-ros2-drive.md
       - Odometry, TF & RViz: tutorials/07-odom-tf.md
+  - Applications:
+      - Arm control with MoveIt 2: tutorials/12-moveit2.md
   - Reference:
       - Troubleshooting: reference/troubleshooting.md
       - Credits & license: reference/credits.md

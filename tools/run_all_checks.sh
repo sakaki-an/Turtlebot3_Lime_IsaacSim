@@ -43,6 +43,7 @@ check() {
 check_with_ros() {
   local id=$1 script=$2 media=$3 ros_cmd=$4 timeout_s=${5:-600}
   want "$id" || return 0
+  tools/stop_isaac.sh >/dev/null; docker/ros_clean.sh >/dev/null  # one simulation, no leftover nodes
   local log="$LOG_DIR/$id.log"
   echo "[$id] $script + ROS: $ros_cmd"
   # shellcheck disable=SC2046
@@ -51,6 +52,7 @@ check_with_ros() {
   for _ in $(seq 1 150); do grep -q "^\[$id\] ready" "$log" 2>/dev/null && break; sleep 2; done
   "$ROS" bash -c "$ros_cmd" >"$LOG_DIR/$id.ros.log" 2>&1
   wait $pid
+  docker/ros_clean.sh >/dev/null
   if grep -q "^\[$id\]\[test\].*PASS" "$log"; then RESULT[$id]=PASS; else RESULT[$id]=FAIL; fi
   grep "^\[$id\]" "$log" | tail -4 | sed 's/^/    /'
 }
@@ -77,6 +79,11 @@ if want 07ros; then
   if grep -q "Translation" "$LOG_DIR/07ros.ros.log"; then RESULT[07ros]=PASS; else RESULT[07ros]=FAIL; fi
   sed 's/^/    /' "$LOG_DIR/07ros.ros.log" | head -3
 fi
+
+check_with_ros 12 isaac/12_moveit.py tutorial12_moveit \
+  'ros2 launch lime_isaac_moveit moveit.launch.py rviz:=false > /tmp/lime_home/moveit.log 2>&1 &
+   for i in $(seq 1 90); do grep -a -q "You can start planning now" /tmp/lime_home/moveit.log && break; sleep 1; done; sleep 3
+   timeout 120 ros2 run lime_isaac_moveit arm_demo --pose demo --gripper open'
 
 echo
 echo "=== Summary ==="

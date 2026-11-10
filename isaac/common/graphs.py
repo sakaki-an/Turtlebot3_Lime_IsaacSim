@@ -4,6 +4,7 @@ Each function builds exactly the graph explained step by step in an earlier tuto
   * create_clock_graph()  - tutorial 06: publish /clock
   * create_drive_graph()  - tutorial 06: /cmd_vel -> Differential Controller -> wheels
   * create_odom_tf_joint_states_graph() - tutorial 07: /odom, TF odom->base_footprint, /joint_states
+  * create_joint_command_graph() - tutorial 12: /isaac_joint_commands -> arm + gripper joints
 
 Call them after SimulationApp is created and the ROS 2 bridge extension is enabled.
 """
@@ -132,6 +133,43 @@ def create_odom_tf_joint_states_graph(
         },
     )
 # --8<-- [end:create_odom_tf_joint_states_graph]
+
+
+# --8<-- [start:create_joint_command_graph]
+def create_joint_command_graph(
+    articulation_root: str,
+    graph_path: str = "/World/ROS2_JointCommands",
+    topic: str = "/isaac_joint_commands",
+):
+    """Tutorial 12: apply sensor_msgs/JointState commands (from ros2_control) to the robot's joints."""
+    import usdrt.Sdf
+
+    og = _og()
+    keys = og.Controller.Keys
+    og.Controller.edit(
+        {"graph_path": graph_path, "evaluator_name": "execution"},
+        {
+            keys.CREATE_NODES: [
+                ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
+                ("SubscribeJointState", "isaacsim.ros2.bridge.ROS2SubscribeJointState"),
+                ("ArticulationController", "isaacsim.core.nodes.IsaacArticulationController"),
+            ],
+            keys.SET_VALUES: [
+                ("SubscribeJointState.inputs:topicName", topic),
+                ("ArticulationController.inputs:targetPrim", [usdrt.Sdf.Path(articulation_root)]),
+            ],
+            keys.CONNECT: [
+                ("OnPlaybackTick.outputs:tick", "SubscribeJointState.inputs:execIn"),
+                ("SubscribeJointState.outputs:execOut", "ArticulationController.inputs:execIn"),
+                # The message says which joints it commands; pass the names through.
+                ("SubscribeJointState.outputs:jointNames", "ArticulationController.inputs:jointNames"),
+                ("SubscribeJointState.outputs:positionCommand", "ArticulationController.inputs:positionCommand"),
+                ("SubscribeJointState.outputs:velocityCommand", "ArticulationController.inputs:velocityCommand"),
+                ("SubscribeJointState.outputs:effortCommand", "ArticulationController.inputs:effortCommand"),
+            ],
+        },
+    )
+# --8<-- [end:create_joint_command_graph]
 
 
 def enable_ros2_realtime(simulation_app, hz: int = 60):

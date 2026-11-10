@@ -17,8 +17,10 @@ GRIPPER_MIMIC_JOINT = "gripper_right_joint"  # follows gripper_left_joint
 GRIPPER_OPEN = 0.019  # m (upper limit)
 GRIPPER_CLOSED = -0.010  # m (lower limit)
 
-# Named arm poses from turtlebot3_lime_moveit_config/config/turtlebot3_lime.srdf (radians)
-ARM_HOME = [0.0, -1.10, 1.87, 0.0, 0.98, 0.0]
+# Named arm poses from turtlebot3_lime_moveit_config/config/turtlebot3_lime.srdf (radians).
+# Upstream "home" has joint3 = 1.87, just beyond the URDF limit 1.8567 - MoveIt refuses to plan from a start
+# state outside the limits, so this project uses 1.85 (also patched in the vendored SRDF).
+ARM_HOME = [0.0, -1.10, 1.85, 0.0, 0.98, 0.0]
 ARM_ZERO = [0.0] * 6
 
 # --- Prim paths inside the robot asset -------------------------------------------------------------
