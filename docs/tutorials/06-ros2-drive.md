@@ -79,7 +79,7 @@ flowchart LR
         creates the controller half of this graph. **Tools ▸ Robotics ▸ ROS 2 OmniGraphs** creates ROS 2 graphs
         for clock, TF, odometry, cameras and LiDAR. Building this one by hand once is the best way to understand what those shortcuts produce.
 
-    <div class="shot-todo">📸 Screenshot pending: <code>gui/06_action_graph.png</code> (the graph above in the Action Graph editor).</div>
+    ![The finished graph in the Action Graph editor](../assets/img/gui/06_action_graph.png){ .full }
 
 === "Python (standalone)"
 

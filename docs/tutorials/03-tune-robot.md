@@ -81,27 +81,30 @@ treats more, and it prints a warning.
     Start from the stage of tutorial 02 (robot referenced, `Physics = physx`, ground plane).
 
     **Drives.** In the Stage panel open `turtlebot3_lime ▸ Physics` and select a joint, for example `joint2`.
-    In **Property ▸ Drive (Angular)** set *Stiffness*, *Damping* and *Max Force* (in **per-degree** units, see the table above).
+    In **Property ▸ Drive ▸ Angular** set *Stiffness*, *Damping* and *Max Force* (in **per-degree** units, see the table above).
     Set *Target Position* in **degrees**. Select several joints at once (Ctrl+click) to edit them together.
+
+    ![Property ▸ Drive ▸ Angular of joint2 (tuned values, per-degree units)](../assets/img/gui/03_drive_properties.png){ .full }
 
     **Gain Tuner.** **Tools ▸ Robotics ▸ Asset Editors ▸ Gain Tuner** shows all joints of the selected
     articulation in one table. It can also play test motions (sinusoids or steps) and plot how each
     joint follows them. Use it to see the effect of a gain before you commit to it.
 
-    **Friction.** **Create ▸ Physics ▸ Physics Material** (rigid body). Set *Static/Dynamic Friction*.
-    In **Friction Combine Mode** choose `min` for the caster material. Then select each caster collider
-    (`caster_back_*_link/box`) and, in **Property ▸ Materials on selected models**, bind the material
-    with purpose **physics**.
+    ![Gain Tuner](../assets/img/gui/03_gain_tuner.png){ .full }
 
-    **Solver.** Select `base_link` (the articulation root). In **Property ▸ Physx Articulation** set
-    *Solver Position Iteration Count* = 64 and *Solver Velocity Iteration Count* = 4.
+    **Friction.** **Create ▸ Physics ▸ Physics Material** (rigid body). In its **Rigid Body Material** section
+    set *Static/Dynamic Friction*. In its **Material (PhysX)** section set the *Friction Combine Mode* to `min`
+    for the caster material. Then select each caster collider (`caster_back_*_link/box`) and choose the
+    material in **Property ▸ Physics materials on selected models**. Do not use the *Materials on
+    selected models* section: that one is for the visual look.
+
+    **Solver.** Select `base_link` (the articulation root). In its **Articulation Root** / **PhysxArticulationAPI**
+    properties set *Solver Position Iteration Count* = 64 and *Solver Velocity Iteration Count* = 4.
 
     **Save as an override layer.** Instead of editing the imported files, create a new stage and add the
     imported robot as a reference (**File ▸ Add Reference**). Make your edits there, then **File ▸ Save As**
     `assets/usd/turtlebot3_lime_tuned.usda`. Your edits are stored as *overs* on top of the
     reference. That is exactly what the script below produces.
-
-    <div class="shot-todo">📸 Screenshot pending: <code>gui/03_drive_properties.png</code> (Property ▸ Drive of joint2) and <code>gui/03_gain_tuner.png</code>.</div>
 
 === "Python (standalone)"
 

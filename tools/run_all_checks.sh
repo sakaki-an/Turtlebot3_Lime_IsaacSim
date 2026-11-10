@@ -33,7 +33,8 @@ check() {
   local log="$LOG_DIR/$id.log"
   echo "[$id] $script ..."
   # shellcheck disable=SC2046
-  timeout "$timeout_s" python "$script" --headless --test $(record_flag "$media") >"$log" 2>&1
+  # shellcheck disable=SC2086
+  timeout "$timeout_s" python $script --headless --test $(record_flag "$media") >"$log" 2>&1
   if grep -q "^\[$id\]\[test\].*PASS" "$log"; then RESULT[$id]=PASS; else RESULT[$id]=FAIL; fi
   grep "^\[$id\]" "$log" | tail -4 | sed 's/^/    /'
 }
@@ -57,7 +58,8 @@ check_with_ros() {
 "$ROS" true >/dev/null  # make sure the ROS container is running
 
 check 00 isaac/00_check_setup.py "" 300
-check 02 isaac/02_import_urdf.py tutorial02_import 1200
+# 02 imports into _out/ so the committed asset in assets/usd/ (and git history) stays untouched.
+check 02 "isaac/02_import_urdf.py --out _out/import_check" tutorial02_import 1200
 check 03 isaac/03_tune_robot.py tutorial03_tuned
 check_with_ros 06 isaac/06_ros2_drive.py tutorial06_ros2_drive \
   "ros2 topic pub --times 120 -r 10 /cmd_vel geometry_msgs/msg/Twist '{linear: {x: 0.25}, angular: {z: 0.5}}'"

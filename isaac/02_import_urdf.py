@@ -19,7 +19,10 @@ import sys
 
 from common.cli import parse_args
 
-args = parse_args(__doc__.splitlines()[0])
+args = parse_args(
+    __doc__.splitlines()[0],
+    extra=lambda p: p.add_argument("--out", default=None, help="output folder (default: assets/usd)"),
+)
 
 # --- 1. Start Isaac Sim. Nothing from omni / isaacsim / pxr may be imported before this line. ---
 from isaacsim import SimulationApp
@@ -41,14 +44,17 @@ from isaacsim.asset.importer.urdf import URDFImporter, URDFImporterConfig
 # --- 2. Convert URDF -> USD -----------------------------------------------------------------------
 # The importer never overwrites: an existing folder would make it write "turtlebot3_lime_1".
 # This tutorial re-creates the asset from scratch each time, so remove the previous output first.
-out_dir = LIME_IMPORTED_USD.parent
+from pathlib import Path
+
+out_root = Path(args.out).resolve() if args.out else USD_DIR
+out_dir = out_root / LIME_IMPORTED_USD.parent.name
 if out_dir.exists():
     print(f"[02] removing previous import: {out_dir}")
     shutil.rmtree(out_dir)
 
 config = URDFImporterConfig(
     urdf_path=str(LIME_URDF),
-    usd_path=str(USD_DIR),  # output *folder*; the importer adds a sub-folder named after the robot
+    usd_path=str(out_root),  # output *folder*; the importer adds a sub-folder named after the robot
     fix_base=False,  # a mobile robot must NOT be welded to the world
     merge_fixed_joints=False,  # keep sensor frames (base_scan, camera_*_optical_frame, imu_link) as prims
     collision_from_visuals=False,  # the URDF already has good collision shapes

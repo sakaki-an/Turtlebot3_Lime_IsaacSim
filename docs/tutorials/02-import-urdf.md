@@ -69,6 +69,9 @@ Inside the robot, links are nested like the URDF tree under `Geometry/`, and joi
     2. **File ▸ Import**, then select `assets/urdf/turtlebot3_lime.urdf`.
     3. The options for this file appear on the right side of the dialog:
 
+        ![File ▸ Import options](../assets/img/gui/02_import_options.png){ width="420" }
+
+
         | Section | Option | Value | Why |
         |---|---|---|---|
         | Model | USD Output | `assets/usd` | the importer adds a `turtlebot3_lime/` folder |
@@ -76,16 +79,17 @@ Inside the robot, links are nested like the URDF tree under `Geometry/`, and joi
         | Colliders | Allow Self-Collision | off | |
         | Options | Robot Type | **Mobile Manipulators** | |
         | Options | Base Type | **Mobile** | a mobile robot must not be welded to the world (*Fixed*) |
-        | Options | Add Reference to Stage | on | puts the robot into the open stage |
+        | Options | Add Reference to Stage | **on** (default: off) | adds the robot to the open stage; when off, the imported file is opened instead |
         | Options | Merge Mesh | off | |
 
     4. Click **Import**. Converting the 29 MB base mesh takes a couple of minutes.
     5. In the **Stage** panel select the robot prim. In **Property ▸ Variants** set **Physics = physx**.
+
+        ![Property ▸ Variants ▸ Physics = physx](../assets/img/gui/02_physics_variant.png){ .full }
+
     6. Add a floor: **Create ▸ Physics ▸ Ground Plane**. Add a light if the scene is dark:
        **Create ▸ Light ▸ Dome Light**.
     7. Press **Play** ▶. The robot drops onto the floor and the arm folds down. That is expected.
-
-    <div class="shot-todo">📸 Screenshot pending: <code>gui/02_import_options.png</code> (File ▸ Import with the URDF options).</div>
 
 === "Python (standalone)"
 
