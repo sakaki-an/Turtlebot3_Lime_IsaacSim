@@ -1,0 +1,33 @@
+/* Videos and screenshots fill the content width */
+.md-typeset video,
+.md-typeset img.full {
+  width: 100%;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* "Result" figure under each tutorial */
+.md-typeset figure.result {
+  margin: 1.5em 0;
+}
+.md-typeset figure.result figcaption {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+/* Tutorial meta line (time / level) */
+.md-typeset .tutorial-meta {
+  font-size: 0.85em;
+  opacity: 0.85;
+  margin-top: -0.6em;
+}
+
+/* Placeholder box for screenshots that still need a manual capture */
+.md-typeset .shot-todo {
+  border: 2px dashed var(--md-accent-fg-color);
+  border-radius: 6px;
+  padding: 1em;
+  text-align: center;
+  font-size: 0.85em;
+  opacity: 0.85;
+}

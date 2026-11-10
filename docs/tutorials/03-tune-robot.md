@@ -1,0 +1,153 @@
+# 03 · Tune the robot
+
+<p class="tutorial-meta">⏱ 25 min · Level: beginner → intermediate · Script: <code>isaac/03_tune_robot.py</code></p>
+
+**Goal.** Make the imported Lime simulate well. The arm should hold its pose, the wheels should follow
+velocity commands, the casters should slide, and the gripper should open and close. The tuning goes
+into its own USD file, so a re-import never loses it.
+
+<figure class="result" markdown>
+<video controls autoplay loop muted playsinline>
+  <source src="../../assets/video/tutorial03_tuned.mp4" type="video/mp4">
+</video>
+<figcaption>Tuned: the arm holds the folded "home" pose, the robot drives 0.87 m in 3 s at 5 rad/s (ideal 0.90 m), and the gripper opens.</figcaption>
+</figure>
+
+## Concepts
+
+### Joint drives
+
+Every movable joint has a **drive**, a spring-damper that PhysX solves *implicitly*, so it stays stable even when stiff:
+
+$$
+\tau = k_p\,(q_{target} - q) + k_d\,(\dot q_{target} - \dot q), \qquad |\tau| \le \tau_{max}
+$$
+
+| Use | stiffness $k_p$ | damping $k_d$ | target |
+|---|---|---|---|
+| **Position control** (arm, gripper) | > 0 | > 0 | position |
+| **Velocity control** (wheels) | **0** | > 0 | velocity |
+
+$\tau_{max}$ is **Max Force**. The importer took it from the URDF `effort` limits (wheels 3 N·m, arm 1 N·m)
+but left stiffness and damping at 0, which is why everything was limp in tutorial 02.
+
+!!! warning "Units: USD stores angular gains *per degree*"
+    In the Property panel and in the `.usda` file, revolute stiffness is **N·m/deg** and damping is
+    **N·m·s/deg**. Isaac Sim's Python APIs (`Articulation.set_dof_gains`) use **radians**.
+    200 N·m/rad = 3.49 N·m/deg. The script converts with `gain * π / 180`.
+
+### Friction and *combine modes*
+
+Where two colliders touch, PhysX **combines** their friction coefficients. The default is the **average**.
+Our casters are meant to slide (friction 0), but on a floor with friction 0.5 the average gives
+**0.25**. The two caster pads carry the heavy battery, so that was enough to brake the robot to half
+speed. Setting the caster material's combine mode to **min** makes its 0.0 win.
+
+| Measurement (5 rad/s for 3 s) | Distance | Wheel speed |
+|---|---|---|
+| caster friction 0, combine *average* | 0.47 m | ≈ 2.3 rad/s, jittery |
+| caster friction 0, combine **min** | **0.87 m** | **5.0 rad/s** |
+
+### Solver iterations
+
+An articulation (the robot's joint tree) is solved iteratively. With the defaults the Lime's wheels jittered.
+Raising **position iterations to 64** made them smooth. Keep **velocity iterations ≤ 4**: PhysX's TGS
+solver changed how it treats more, and it prints a warning.
+
+## The values
+
+| What | Setting |
+|---|---|
+| Wheels (×2) | velocity drive: stiffness 0, damping 100 N·m·s/rad, max force 3 N·m (XM430-W210) |
+| Arm joints (×6) | position drive: stiffness 200 N·m/rad, damping 10 N·m·s/rad, max force 4.1 N·m (XM430-W350 stall torque) |
+| Arm start pose | the SRDF `home` pose `[0, -1.10, 1.87, 0, 0.98, 0]` rad, as both the drive target and the initial joint state |
+| Gripper (left) | position drive: stiffness 1000 N/m, damping 20 N·s/m, max force 10 N |
+| Gripper (right) | no drive. It follows the left finger through its mimic joint |
+| Tyres / casters | friction 1.0 (average) / friction 0.0 (**min**) |
+| Articulation | 64 position / 4 velocity solver iterations |
+
+## Tune it
+
+=== "GUI"
+
+    Start from the stage of tutorial 02 (robot referenced, `Physics = physx`, ground plane).
+
+    **Drives.** In the Stage panel open `turtlebot3_lime ▸ Physics` and select a joint, for example `joint2`.
+    In **Property ▸ Drive (Angular)** set *Stiffness*, *Damping* and *Max Force* (in **per-degree** units, see the table above).
+    Set *Target Position* in **degrees**. Select several joints at once (Ctrl+click) to edit them together.
+
+    **Gain Tuner.** **Tools ▸ Robotics ▸ Asset Editors ▸ Gain Tuner** shows all joints of the selected
+    articulation in one table. It can also play test motions (sinusoids or steps) and plot how each
+    joint follows them. Use it to see the effect of a gain before you commit to it.
+
+    **Friction.** **Create ▸ Physics ▸ Physics Material** (rigid body). Set *Static/Dynamic Friction*.
+    In **Friction Combine Mode** choose `min` for the caster material. Then select each caster collider
+    (`caster_back_*_link/box`) and, in **Property ▸ Materials on selected models**, bind the material
+    with purpose **physics**.
+
+    **Solver.** Select `base_link` (the articulation root). In **Property ▸ Physx Articulation** set
+    *Solver Position Iteration Count* = 64 and *Solver Velocity Iteration Count* = 4.
+
+    **Save as an override layer.** Instead of editing the imported files, create a new stage and add the
+    imported robot as a reference (**File ▸ Add Reference**). Make your edits there, then **File ▸ Save As**
+    `assets/usd/turtlebot3_lime_tuned.usda`. Your edits are stored as *overs* on top of the
+    reference. That is exactly what the script below produces.
+
+    <div class="shot-todo">📸 Screenshot pending: <code>gui/03_drive_properties.png</code> (Property ▸ Drive of joint2) and <code>gui/03_gain_tuner.png</code>.</div>
+
+=== "Python (standalone)"
+
+    ```bash
+    source scripts/isaac_env.sh
+    python isaac/03_tune_robot.py --headless --test
+    ```
+
+    The script writes `assets/usd/turtlebot3_lime_tuned.usda`, a small layer that *references* the
+    import and adds overrides. Then it loads that file and checks the result.
+
+    ```python
+    robot = stage.DefinePrim("/turtlebot3_lime", "Xform")
+    robot.GetReferences().AddReference("./turtlebot3_lime/turtlebot3_lime.usda")
+    robot.GetVariantSet("Physics").SetVariantSelection("physx")      # (1)!
+
+    drive = UsdPhysics.DriveAPI.Apply(joint_prim, "angular")
+    drive.CreateStiffnessAttr(200.0 * math.pi / 180.0)                # (2)!
+    drive.CreateDampingAttr(10.0 * math.pi / 180.0)
+    drive.CreateMaxForceAttr(4.1)
+    drive.CreateTargetPositionAttr(math.degrees(home))                 # (3)!
+
+    PhysxSchema.PhysxMaterialAPI.Apply(caster_material).CreateFrictionCombineModeAttr("min")
+    ```
+
+    1. Users of the tuned file no longer have to pick the physics variant.
+    2. N·m/rad → N·m/deg.
+    3. USD joint angles are in degrees too.
+
+    ??? example "Full script: `isaac/03_tune_robot.py`"
+        ```python
+        --8<-- "isaac/03_tune_robot.py"
+        ```
+
+## Check the result
+
+```text
+[03] arm max error after 2 s : 0.013 rad
+[03] distance in 3 s         : 0.874 m (ideal 0.90 m)
+[03] gripper left / right    : 0.0190 / 0.0190 m (target 0.019)
+[03][test] PASS
+```
+
+- The arm holds `home` against gravity to within 0.013 rad (< 1°).
+- 5 rad/s × 0.06 m = 0.30 m/s, so 0.90 m in 3 s. The missing 2.6 cm is the acceleration phase.
+- The right finger copies the left one exactly: the mimic joint works under PhysX.
+
+![Tuned robot](../assets/img/tutorial03_tuned.png){ .full }
+
+!!! tip "Experiment"
+    Change `ARM_DRIVE = dict(stiffness=200.0, ...)` to `stiffness=20.0` and re-run: the arm sags.
+    Set the caster combine mode back to `"average"`: the robot only covers about 0.47 m.
+
+From now on every tutorial loads **`assets/usd/turtlebot3_lime_tuned.usda`**. In Python that is
+`common.lime.add_lime()`.
+
+**Next:** [06 · Drive with ROS 2](06-ros2-drive.md)

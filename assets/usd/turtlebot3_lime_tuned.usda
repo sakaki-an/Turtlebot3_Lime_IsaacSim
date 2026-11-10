@@ -165,7 +165,7 @@ def Xform "turtlebot3_lime" (
             )
             {
                 int physxArticulation:solverPositionIterationCount = 64
-                int physxArticulation:solverVelocityIterationCount = 16
+                int physxArticulation:solverVelocityIterationCount = 4
 
                 over "wheel_left_link"
                 {

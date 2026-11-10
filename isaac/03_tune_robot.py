@@ -45,7 +45,7 @@ ARM_DRIVE = dict(stiffness=200.0, damping=10.0, max_force=4.1)  # position contr
 GRIPPER_DRIVE = dict(stiffness=1000.0, damping=20.0, max_force=10.0)  # position control, prismatic (N/m)
 WHEEL_FRICTION = 1.0  # rubber tyres
 CASTER_FRICTION = 0.0  # the caster pads should slide freely
-SOLVER_ITERATIONS = (64, 16)  # (position, velocity) iterations of the articulation solver
+SOLVER_ITERATIONS = (64, 4)  # (position, velocity) iterations; PhysX TGS wants <= 4 velocity iterations
 
 
 def angular_gain_to_usd(gain_per_rad: float) -> float:
