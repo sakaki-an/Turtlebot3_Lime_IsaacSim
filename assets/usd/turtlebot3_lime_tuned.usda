@@ -167,30 +167,6 @@ def Xform "turtlebot3_lime" (
                 int physxArticulation:solverPositionIterationCount = 64
                 int physxArticulation:solverVelocityIterationCount = 4
 
-                over "wheel_left_link"
-                {
-                    over "cylinder" (
-                        prepend apiSchemas = ["MaterialBindingAPI"]
-                    )
-                    {
-                        rel material:binding:physics = </turtlebot3_lime/PhysicsMaterials/wheel> (
-                            bindMaterialAs = "weakerThanDescendants"
-                        )
-                    }
-                }
-
-                over "wheel_right_link"
-                {
-                    over "cylinder" (
-                        prepend apiSchemas = ["MaterialBindingAPI"]
-                    )
-                    {
-                        rel material:binding:physics = </turtlebot3_lime/PhysicsMaterials/wheel> (
-                            bindMaterialAs = "weakerThanDescendants"
-                        )
-                    }
-                }
-
                 over "caster_back_left_link"
                 {
                     over "box" (
@@ -212,6 +188,44 @@ def Xform "turtlebot3_lime" (
                         rel material:binding:physics = </turtlebot3_lime/PhysicsMaterials/caster> (
                             bindMaterialAs = "weakerThanDescendants"
                         )
+                    }
+                }
+
+                over "wheel_left_link"
+                {
+                    over "cylinder"
+                    {
+                        bool physics:collisionEnabled = 0
+                    }
+
+                    def Sphere "sphere_collider" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "MaterialBindingAPI"]
+                    )
+                    {
+                        rel material:binding:physics = </turtlebot3_lime/PhysicsMaterials/wheel> (
+                            bindMaterialAs = "weakerThanDescendants"
+                        )
+                        uniform token purpose = "guide"
+                        double radius = 0.06
+                    }
+                }
+
+                over "wheel_right_link"
+                {
+                    over "cylinder"
+                    {
+                        bool physics:collisionEnabled = 0
+                    }
+
+                    def Sphere "sphere_collider" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "MaterialBindingAPI"]
+                    )
+                    {
+                        rel material:binding:physics = </turtlebot3_lime/PhysicsMaterials/wheel> (
+                            bindMaterialAs = "weakerThanDescendants"
+                        )
+                        uniform token purpose = "guide"
+                        double radius = 0.06
                     }
                 }
             }

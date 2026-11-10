@@ -55,6 +55,23 @@ Measured with the script (both wheels at 5 rad/s for 3 s, ideal distance 0.90 m)
 The second row confirms the cause: removing friction at the caster–floor contact fixes the problem.
 The third row fixes it without touching the floor.
 
+### Wheel colliders: cylinder vs sphere
+
+The URDF describes each tyre as a cylinder, 0.06 m radius and 24 mm wide. A cylinder touches the floor along a
+**line** across its tread. When the robot turns, the inner and outer end of that line would need different
+speeds, so the tyre scrubs and resists the turn. A **sphere** with the same radius touches the floor in one
+**point**, which is the ideal wheel that the differential-drive formula (tutorial 06) assumes.
+
+Measured: command 0.2 m/s and 0.5 rad/s, then read the robot's real yaw rate:
+
+| Tyre collider | Wheel speeds (command 2.11 / 4.56 rad/s) | Yaw rate (command 0.5 rad/s) |
+|---|---|---|
+| cylinder (URDF) | 2.40 / 4.16 rad/s | 0.44 rad/s |
+| **sphere** | **2.06 / 4.56 rad/s** | **0.50 rad/s** |
+
+So the tuned asset switches the cylinder's collision off and adds an invisible sphere collider (`sphere_collider`,
+purpose *guide*) to each wheel link. The visible tyre mesh is unchanged.
+
 ### Solver iterations
 
 An articulation (the robot's joint tree) is solved iteratively. Raising the articulation's
@@ -72,6 +89,7 @@ treats more, and it prints a warning.
 | Gripper (left) | position drive: stiffness 1000 N/m, damping 20 N·s/m, max force 10 N |
 | Gripper (right) | no drive. It follows the left finger through its mimic joint |
 | Tyres / casters | friction 1.0 (average) / friction 0.0 (**min**) |
+| Tyre collision shape | **sphere**, r = 0.06 m, instead of the URDF cylinder |
 | Articulation | 64 position / 4 velocity solver iterations |
 
 ## Tune it
@@ -97,6 +115,10 @@ treats more, and it prints a warning.
     for the caster material. Then select each caster collider (`caster_back_*_link/box`) and choose the
     material in **Property ▸ Physics materials on selected models**. Do not use the *Materials on
     selected models* section: that one is for the visual look.
+
+    **Sphere tyres.** For each `wheel_*_link`: select its `cylinder` and untick **Collider ▸ Collision Enabled**.
+    Then right-click the link and choose **Create ▸ Shape ▸ Sphere**. Set its *Radius* to `0.06` and *Purpose* to
+    `guide` (not rendered). Add a collider with **Add ▸ Physics ▸ Collider** and bind the tyre physics material.
 
     **Solver.** Select `base_link` (the articulation root). In its **Articulation Root** / **PhysxArticulationAPI**
     properties set *Solver Position Iteration Count* = 64 and *Solver Velocity Iteration Count* = 4.

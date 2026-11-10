@@ -64,6 +64,20 @@ check 03 isaac/03_tune_robot.py tutorial03_tuned
 check_with_ros 06 isaac/06_ros2_drive.py tutorial06_ros2_drive \
   "ros2 topic pub --times 120 -r 10 /cmd_vel geometry_msgs/msg/Twist '{linear: {x: 0.25}, angular: {z: 0.5}}'"
 
+check 07 isaac/07_odom_tf.py tutorial07_odom_tf
+
+# 07 (ROS side): robot_state_publisher in the container must complete the TF chain odom -> end_effector_link.
+if want 07ros; then
+  echo "[07ros] isaac/07_odom_tf.py + robot_state_publisher + tf2_echo"
+  ( timeout 120 python isaac/07_odom_tf.py --headless >"$LOG_DIR/07ros.log" 2>&1 ) &
+  for _ in $(seq 1 90); do grep -q "^\[07\] ready" "$LOG_DIR/07ros.log" 2>/dev/null && break; sleep 2; done
+  "$ROS" bash -c 'ros2 launch lime_isaac_bringup robot_state_publisher.launch.py > /tmp/lime_home/rsp.log 2>&1 & RSP=$!; sleep 8;
+    timeout 8 ros2 run tf2_ros tf2_echo odom end_effector_link 2>&1 | grep -m1 Translation; kill $RSP' >"$LOG_DIR/07ros.ros.log" 2>&1
+  wait
+  if grep -q "Translation" "$LOG_DIR/07ros.ros.log"; then RESULT[07ros]=PASS; else RESULT[07ros]=FAIL; fi
+  sed 's/^/    /' "$LOG_DIR/07ros.ros.log" | head -3
+fi
+
 echo
 echo "=== Summary ==="
 fail=0

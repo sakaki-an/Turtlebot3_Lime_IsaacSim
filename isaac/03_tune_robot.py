@@ -119,14 +119,28 @@ def physics_material(path: str, friction: float, combine_mode: str = "average") 
 wheel_mat = physics_material("/turtlebot3_lime/PhysicsMaterials/wheel", WHEEL_FRICTION)
 caster_mat = physics_material("/turtlebot3_lime/PhysicsMaterials/caster", CASTER_FRICTION, combine_mode="min")
 base = f"/turtlebot3_lime/{lime.BASE_LINK}"
-for link, shape, mat in [
-    ("wheel_left_link", "cylinder", wheel_mat),
-    ("wheel_right_link", "cylinder", wheel_mat),
-    ("caster_back_left_link", "box", caster_mat),
-    ("caster_back_right_link", "box", caster_mat),
-]:
-    collider = stage.GetPrimAtPath(f"{base}/{link}/{shape}")
-    UsdShade.MaterialBindingAPI.Apply(collider).Bind(mat, UsdShade.Tokens.weakerThanDescendants, "physics")
+
+
+def bind_physics_material(prim: Usd.Prim, mat: UsdShade.Material):
+    UsdShade.MaterialBindingAPI.Apply(prim).Bind(mat, UsdShade.Tokens.weakerThanDescendants, "physics")
+
+
+for link in ["caster_back_left_link", "caster_back_right_link"]:
+    bind_physics_material(stage.GetPrimAtPath(f"{base}/{link}/box"), caster_mat)
+
+# 3b. Wheel colliders: sphere instead of cylinder ------------------------------------------------------
+# The URDF tyre is a 24 mm wide cylinder that touches the floor along a LINE. In a turn the inner and
+# outer edge of that line want different speeds, the tyre scrubs, and the robot turns ~12 % slower than
+# commanded. A sphere of the same radius touches the floor in one POINT, like the ideal wheel the
+# differential-drive formula assumes (measured: 0.44 -> 0.50 rad/s for a 0.5 rad/s command).
+for link in lime.WHEEL_JOINTS:
+    link_path = f"{base}/{link.replace('_joint', '_link')}"
+    UsdPhysics.CollisionAPI(stage.GetPrimAtPath(f"{link_path}/cylinder")).CreateCollisionEnabledAttr(False)
+    sphere = UsdGeom.Sphere.Define(stage, f"{link_path}/sphere_collider")
+    sphere.CreateRadiusAttr(lime.WHEEL_RADIUS)
+    sphere.CreatePurposeAttr(UsdGeom.Tokens.guide)  # a collision shape only: not rendered
+    UsdPhysics.CollisionAPI.Apply(sphere.GetPrim())
+    bind_physics_material(sphere.GetPrim(), wheel_mat)
 
 # 4. Articulation solver ---------------------------------------------------------------------------------
 # More solver iterations = more accurate joints + contacts (default: 32 position iterations).

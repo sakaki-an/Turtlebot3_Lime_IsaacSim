@@ -37,10 +37,11 @@ Then follow the [tutorials](https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim
 | 02 | Import TurtleBot3 Lime (URDF → USD) | `isaac/02_import_urdf.py` |
 | 03 | Tune the robot (drives, friction, solver) | `isaac/03_tune_robot.py` |
 | 06 | Drive with ROS 2 `/cmd_vel` (Action Graph) | `isaac/06_ros2_drive.py` |
+| 07 | Odometry, TF, joint states, RViz | `isaac/07_odom_tf.py` + `ros2 launch lime_isaac_bringup view_robot.launch.py` |
 
 Every script accepts `--headless`, `--test` (automatic check, prints `PASS`/`FAIL`) and `--record NAME`
 (saves the media used on the website). More tutorials are on the way: Isaac Sim basics, Python control,
-Action Graph keyboard teleop, odometry/TF/RViz, camera, LiDAR + IMU, YOLO, Nav2 and MoveIt 2.
+Action Graph keyboard teleop, camera, LiDAR + IMU, YOLO, Nav2 and MoveIt 2.
 
 ## Repository layout
 

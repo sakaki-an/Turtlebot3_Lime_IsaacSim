@@ -161,4 +161,4 @@ Look at the clock as well:
 | The robot turns the wrong way or drives backwards | Check the `jointNames` order: left first, then right. |
 | The robot is slow or jittery | You are not using the tuned asset (see [03](03-tune-robot.md)). |
 
-**Next:** odometry, TF and RViz, coming soon.
+**Next:** [07 · Odometry, TF & RViz](07-odom-tf.md)
