@@ -1,0 +1,139 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.3.2"
+    }
+    endTimeCode = 1000000
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    startTimeCode = 0
+    upAxis = "Z"
+)
+
+def Scope "Materials"
+{
+    def Material "light_black"
+    {
+        color3f inputs:diffuseColor = (0.13286832, 0.13286833, 0.13286832)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/light_black/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/light_black.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/light_black.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/light_black.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/light_black.inputs:roughness>
+            token outputs:surface
+        }
+    }
+
+    def Material "dark"
+    {
+        color3f inputs:diffuseColor = (0.07323896, 0.07323897, 0.07323896)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/dark/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/dark.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/dark.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/dark.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/dark.inputs:roughness>
+            token outputs:surface
+        }
+    }
+
+    def Material "ID10"
+    {
+        color3f inputs:diffuseColor = (0.5209961, 0.52099615, 0.5209961)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/ID10/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/ID10.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/ID10.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/ID10.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/ID10.inputs:roughness>
+            token outputs:surface
+        }
+    }
+
+    def Material "grey"
+    {
+        color3f inputs:diffuseColor = (0.21404113, 0.21404114, 0.21404111)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/grey/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/grey.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/grey.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/grey.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/grey.inputs:roughness>
+            token outputs:surface
+        }
+    }
+}
+

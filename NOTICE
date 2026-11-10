@@ -1,0 +1,29 @@
+TurtleBot3 Lime x Isaac Sim 6.2 Tutorials
+Copyright 2026 An (sakaki-an)
+
+This project is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It includes or is derived from the following third-party work:
+
+1. TurtleBot3 Lime ROS packages
+   https://github.com/ROBOTIS-JAPAN-GIT/turtlebot3_lime (branch humble-devel,
+   commit 3363b27aae6d37598dc142cf4dddb342fef3047f)
+   Copyright ROBOTIS CO., LTD. / ROBOTIS JAPAN - Apache License 2.0
+   Vendored in ros2_ws/src/turtlebot3_lime/ (turtlebot3_lime_description,
+   turtlebot3_lime_moveit_config), including the robot meshes.
+   Modifications (ROS 2 Jazzy + Isaac Sim port) are marked in the modified files.
+
+2. Turtlebot3_Lime_IsaacSim_Humble
+   https://github.com/momoiorg-repository/Turtlebot3_Lime_IsaacSim_Humble
+   Copyright (c) 2025 An - MIT License
+   Used as the reference for topic and controller names (Isaac Sim 4.5 / Humble version).
+
+3. Intel RealSense D435 mesh (assets/urdf/meshes/d435.dae)
+   From realsense2_description, https://github.com/IntelRealSense/realsense-ros
+   Copyright Intel Corporation - Apache License 2.0
+
+Runtime dependencies that are NOT redistributed here:
+  * NVIDIA Isaac Sim 6.2 - NVIDIA Isaac Sim Additional Software and Materials License
+    and NVIDIA Software License Agreement (installed by the user via pip).
+  * Ultralytics YOLO - AGPL-3.0 (installed in the ROS container; weights are
+    downloaded at runtime and never committed to this repository).

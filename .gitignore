@@ -1,0 +1,20 @@
+# Python / venvs
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+# MkDocs build output
+site/
+# ROS 2 build artifacts
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+# Isaac Sim / Kit caches and scratch output
+_out*/
+*.log
+# YOLO weights (downloaded at runtime; Ultralytics is AGPL-3.0)
+*.pt
+*.onnx
+*.engine
+# Upstream clone used only to generate the URDF
+.upstream/

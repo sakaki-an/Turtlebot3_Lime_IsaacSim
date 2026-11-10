@@ -1,0 +1,285 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.3.2"
+    }
+    defaultPrim = "turtlebot3_lime"
+    endTimeCode = 1000000
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    startTimeCode = 0
+    upAxis = "Z"
+)
+
+over "turtlebot3_lime" (
+    prepend apiSchemas = ["IsaacRobotAPI"]
+)
+{
+    prepend rel isaac:physics:robotJoints = [
+        </turtlebot3_lime/Physics/wheel_left_joint>,
+        </turtlebot3_lime/Physics/wheel_right_joint>,
+        </turtlebot3_lime/Physics/caster_back_right_joint>,
+        </turtlebot3_lime/Physics/caster_back_left_joint>,
+        </turtlebot3_lime/Physics/scan_joint>,
+        </turtlebot3_lime/Physics/battery_joint>,
+        </turtlebot3_lime/Physics/base_fixed>,
+        </turtlebot3_lime/Physics/joint1>,
+        </turtlebot3_lime/Physics/joint2>,
+        </turtlebot3_lime/Physics/joint3>,
+        </turtlebot3_lime/Physics/joint4>,
+        </turtlebot3_lime/Physics/joint5>,
+        </turtlebot3_lime/Physics/joint6>,
+        </turtlebot3_lime/Physics/gripper_left_joint>,
+        </turtlebot3_lime/Physics/gripper_right_joint>,
+        </turtlebot3_lime/Physics/end_effector_joint>,
+        </turtlebot3_lime/Physics/camera_link_joint>,
+    ]
+    prepend rel isaac:physics:robotLinks = [
+        </turtlebot3_lime/Geometry/base_footprint/base_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/wheel_left_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/wheel_right_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/caster_back_right_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/caster_back_left_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/base_scan>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/battery_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4/link5>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4/link5/link6>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4/link5/link6/link7>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4/link5/link6/link7/gripper_left_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4/link5/link6/link7/gripper_right_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/link1/link2/link3/link4/link5/link6/link7/end_effector_link>,
+        </turtlebot3_lime/Geometry/base_footprint/base_link/camera_bottom_screw_frame/camera_link>,
+    ]
+    token isaac:robotType = "Mobile Manipulators"
+
+    over "Geometry"
+    {
+        over "base_footprint"
+        {
+            over "base_link" (
+                prepend apiSchemas = ["IsaacLinkAPI"]
+            )
+            {
+                over "wheel_left_link" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+
+                over "wheel_right_link" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+
+                over "caster_back_right_link" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+
+                over "caster_back_left_link" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+
+                over "base_scan" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+
+                over "camera_bottom_screw_frame"
+                {
+                    over "camera_link" (
+                        prepend apiSchemas = ["IsaacLinkAPI"]
+                    )
+                    {
+                    }
+                }
+
+                over "link1" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                    over "link2" (
+                        prepend apiSchemas = ["IsaacLinkAPI"]
+                    )
+                    {
+                        over "link3" (
+                            prepend apiSchemas = ["IsaacLinkAPI"]
+                        )
+                        {
+                            over "link4" (
+                                prepend apiSchemas = ["IsaacLinkAPI"]
+                            )
+                            {
+                                over "link5" (
+                                    prepend apiSchemas = ["IsaacLinkAPI"]
+                                )
+                                {
+                                    over "link6" (
+                                        prepend apiSchemas = ["IsaacLinkAPI"]
+                                    )
+                                    {
+                                        over "link7" (
+                                            prepend apiSchemas = ["IsaacLinkAPI"]
+                                        )
+                                        {
+                                            over "gripper_left_link" (
+                                                prepend apiSchemas = ["IsaacLinkAPI"]
+                                            )
+                                            {
+                                            }
+
+                                            over "gripper_right_link" (
+                                                prepend apiSchemas = ["IsaacLinkAPI"]
+                                            )
+                                            {
+                                            }
+
+                                            over "end_effector_link" (
+                                                prepend apiSchemas = ["IsaacLinkAPI"]
+                                            )
+                                            {
+                                            }
+
+                                            over "dummy_mimic_fix" (
+                                                prepend apiSchemas = ["IsaacSiteAPI"]
+                                            )
+                                            {
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                over "imu_link" (
+                    prepend apiSchemas = ["IsaacSiteAPI"]
+                )
+                {
+                }
+
+                over "battery_link" (
+                    prepend apiSchemas = ["IsaacLinkAPI"]
+                )
+                {
+                }
+            }
+        }
+    }
+
+    over "Physics"
+    {
+        over "wheel_left_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "wheel_right_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "caster_back_right_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "caster_back_left_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "scan_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "battery_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "camera_link_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "base_fixed" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "joint1" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "joint2" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "joint3" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "joint4" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "joint5" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "joint6" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "gripper_left_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "gripper_right_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+
+        over "end_effector_joint" (
+            prepend apiSchemas = ["IsaacJointAPI"]
+        )
+        {
+        }
+    }
+}
+

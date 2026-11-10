@@ -1,0 +1,106 @@
+site_name: TurtleBot3 Lime × Isaac Sim
+site_description: Beginner tutorials for NVIDIA Isaac Sim 6.2 and ROS 2 Jazzy, using the TurtleBot3 Lime mobile manipulator.
+site_url: https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim/
+repo_url: https://github.com/sakaki-an/Turtlebot3_Lime_IsaacSim
+repo_name: sakaki-an/Turtlebot3_Lime_IsaacSim
+edit_uri: edit/main/docs/
+copyright: Apache-2.0 · TurtleBot3 Lime packages © ROBOTIS (Apache-2.0)
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: lime
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      accent: lime
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.footer
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Setup: tutorials/00-setup.md
+      - Isaac Sim basics & Hello World: tutorials/01-hello-world.md
+  - Robot Setup:
+      - Import TurtleBot3 Lime: tutorials/02-import-urdf.md
+      - Tune the robot: tutorials/03-tune-robot.md
+      - Move it from Python: tutorials/04-hello-robot.md
+  - OmniGraph:
+      - Your first Action Graph: tutorials/05-action-graph.md
+  - ROS 2:
+      - Drive with /cmd_vel: tutorials/06-ros2-drive.md
+      - Odometry, TF & RViz: tutorials/07-odom-tf.md
+      - Camera (RealSense D435): tutorials/08-camera.md
+      - LiDAR & IMU: tutorials/09-lidar-imu.md
+  - Applications:
+      - Object detection with YOLO: tutorials/10-yolo.md
+      - Navigation with Nav2: tutorials/11-nav2.md
+      - Arm control with MoveIt 2: tutorials/12-moveit2.md
+      - Putting it all together: tutorials/13-all-together.md
+  - Reference:
+      - Troubleshooting: reference/troubleshooting.md
+      - Credits & license: reference/credits.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra_css:
+  - assets/extra.css
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
