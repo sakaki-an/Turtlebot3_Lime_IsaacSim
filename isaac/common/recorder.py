@@ -62,6 +62,12 @@ class Recorder:
         if not force and (self._calls % self.every_n) != 0:
             return
         data = self._annotator.get_data()
+        if data is None or getattr(data, "size", 0) == 0:
+            # Timeline not playing (e.g. a still of an edited stage): render one frame explicitly.
+            import omni.replicator.core as rep
+
+            rep.orchestrator.step(rt_subframes=4)
+            data = self._annotator.get_data()
         if data is not None and getattr(data, "size", 0) > 0:
             self.frames.append(np.asarray(data)[:, :, :3].copy())
 

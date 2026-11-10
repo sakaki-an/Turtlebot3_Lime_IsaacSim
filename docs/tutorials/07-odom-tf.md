@@ -182,4 +182,4 @@ on `/odom` with the command and with the true pose in the simulation:
 | RobotModel is grey / arm in the wrong pose | `/joint_states` missing: check `ros2 topic hz /joint_states`. |
 | TF time jumps / "TF_OLD_DATA" warnings | You restarted the simulation; restart RViz (sim time went back to 0). |
 
-**Next:** camera, LiDAR and IMU (coming next).
+**Next:** [08 · Camera (RealSense D435)](08-camera.md)

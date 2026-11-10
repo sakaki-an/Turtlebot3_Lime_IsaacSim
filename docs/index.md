@@ -44,10 +44,12 @@ Each tutorial has two ways to do the same thing:
 | 03 | [Tune the robot](tutorials/03-tune-robot.md) | Joint drives, gains, friction and friction-combine modes, solver iterations |
 | 06 | [Drive with ROS 2](tutorials/06-ros2-drive.md) | ROS 2 bridge, Action Graph, `/clock`, `/cmd_vel`, differential controller |
 | 07 | [Odometry, TF & RViz](tutorials/07-odom-tf.md) | `/odom`, TF tree, `/joint_states`, `robot_state_publisher`, RViz |
+| 08 | [Camera (RealSense D435)](tutorials/08-camera.md) | RGB, depth, camera_info; optical frames; the lime_room scene |
+| 09 | [LiDAR & IMU](tutorials/09-lidar-imu.md) | RTX LiDAR configured as the LDS-01, `/scan`, IMU, `/imu`, sensors in RViz |
 | 12 | [Arm control with MoveIt 2](tutorials/12-moveit2.md) | ros2_control over topics, MoveIt 2 on Jazzy, planning from RViz and Python |
 
 More tutorials, all verified on Isaac Sim 6.2, are added as they are finished: the Isaac Sim basics,
-Python control, your first Action Graph, camera, LiDAR and IMU, YOLO and Nav2.
+Python control, your first Action Graph, YOLO and Nav2.
 
 ## What you need
 

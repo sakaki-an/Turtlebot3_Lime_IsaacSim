@@ -80,6 +80,9 @@ if want 07ros; then
   sed 's/^/    /' "$LOG_DIR/07ros.ros.log" | head -3
 fi
 
+check 08 isaac/08_camera.py tutorial08_camera
+check 09 isaac/09_lidar_imu.py tutorial09_lidar_imu
+
 check_with_ros 12 isaac/12_moveit.py tutorial12_moveit \
   'ros2 launch lime_isaac_moveit moveit.launch.py rviz:=false > /tmp/lime_home/moveit.log 2>&1 &
    for i in $(seq 1 90); do grep -a -q "You can start planning now" /tmp/lime_home/moveit.log && break; sleep 1; done; sleep 3

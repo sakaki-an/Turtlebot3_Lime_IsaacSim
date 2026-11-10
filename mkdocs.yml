@@ -48,6 +48,8 @@ nav:
   - ROS 2:
       - Drive with /cmd_vel: tutorials/06-ros2-drive.md
       - Odometry, TF & RViz: tutorials/07-odom-tf.md
+      - Camera (RealSense D435): tutorials/08-camera.md
+      - LiDAR & IMU: tutorials/09-lidar-imu.md
   - Applications:
       - Arm control with MoveIt 2: tutorials/12-moveit2.md
   - Reference:

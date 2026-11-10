@@ -270,19 +270,23 @@ async def dump_labels():
     """Print menu entries and Property sections that the GUI instructions refer to."""
     import omni.kit.menu.utils as mu
 
-    def walk(items, prefix):
-        for it in items or []:
+    def walk(items, prefix, depth=0):
+        if depth > 6 or not items:
+            return
+        if isinstance(items, dict):
+            items = items.get("items", [])
+        for it in items:
             name = getattr(it, "name", None)
             if not name:
                 continue
             path = f"{prefix}/{name}"
-            if any(k in path for k in ("Physics", "Light", "Visual Scripting", "Graph")):
+            if any(k in path for k in ("Physics", "Light", "Visual Scripting", "Graph", "Sensor", "Lidar", "LiDAR", "Imu", "IMU", "Camera", "Shape")):
                 print(f"[gui][menu] {path}", flush=True)
-            walk(getattr(it, "sub_menu", None), path)
+            walk(getattr(it, "sub_menu", None), path, depth + 1)
 
     for menu_name, items in mu.get_merged_menus().items():
         if menu_name in ("Create", "Window"):
-            walk(items.get("items") if isinstance(items, dict) else items, menu_name)
+            walk(items, menu_name)
     await new_scene(LIME_USD, variant=False)
     base = f"/World/turtlebot3_lime/{lime.BASE_LINK}"
     for prim in [base, f"{base}/caster_back_left_link/box", "/World/turtlebot3_lime/PhysicsMaterials/caster"]:
