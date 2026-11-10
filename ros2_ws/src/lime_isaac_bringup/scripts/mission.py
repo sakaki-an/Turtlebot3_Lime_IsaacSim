@@ -47,7 +47,8 @@ def wrap(a):
 # --8<-- [start:ik]
 # The arm in the base_footprint frame (from the URDF): joint1 turns about a vertical axis at x = -0.024;
 # joint2, joint3 and joint5 tilt the arm forward; joint4 and joint6 roll. Looking straight down, the arm is
-# a planar 2-link arm (upper arm L1, forearm L2) plus the wrist-to-fingertip length L3.
+# a planar 2-link arm (upper arm L1, forearm L2) plus L3 from the wrist to end_effector_link (the fingertips
+# reach 2 cm further down).
 SHOULDER_X, SHOULDER_Z = -0.024, 0.2065
 L1, L2, L3 = 0.124, 0.1045, 0.1625
 
@@ -57,7 +58,7 @@ def top_down_ik(x, y, z, object_yaw):
     with the fingers closing across an object whose long axis points along object_yaw. None = out of reach."""
     j1 = math.atan2(y, x - SHOULDER_X)
     r = math.hypot(x - SHOULDER_X, y)  # horizontal distance from joint1's axis
-    dz = z + L3 - SHOULDER_Z  # the wrist is L3 above the fingertips
+    dz = z + L3 - SHOULDER_Z  # the wrist is L3 above end_effector_link
     c3 = (r * r + dz * dz - L1 * L1 - L2 * L2) / (2 * L1 * L2)  # law of cosines
     if abs(c3) > 1.0:
         return None
@@ -82,9 +83,10 @@ class Lime:
         self.tf_node = rclpy.create_node("lime_mission_tf", parameter_overrides=[Parameter("use_sim_time", Parameter.Type.BOOL, True)])
         self.tf = tf2_ros.Buffer()
         tf2_ros.TransformListener(self.tf, self.tf_node)
-        executor = SingleThreadedExecutor()
-        executor.add_node(self.tf_node)
-        threading.Thread(target=executor.spin, daemon=True).start()
+        self.executor = SingleThreadedExecutor()
+        self.executor.add_node(self.tf_node)
+        self.tf_thread = threading.Thread(target=self.executor.spin, daemon=True)
+        self.tf_thread.start()
 
         n = self.nav
         self.detections, self.depth, self.K = [], {}, None
@@ -95,6 +97,15 @@ class Lime:
         self.arm = ActionClient(n, MoveGroup, "/move_action")
         self.grip = ActionClient(n, GripperCommand, "/gripper_controller/gripper_cmd")
         self.scene = n.create_client(ApplyPlanningScene, "/apply_planning_scene")
+
+    def close(self):
+        """Stop the TF thread and the nodes before exiting (otherwise Python aborts at exit)."""
+        self.send(0.0, 0.0)
+        self.executor.shutdown()
+        self.tf_thread.join(timeout=2.0)
+        self.tf_node.destroy_node()
+        self.nav.destroy_node()
+        rclpy.try_shutdown()
 
     def on_depth(self, msg):
         self.depth[(msg.header.stamp.sec, msg.header.stamp.nanosec)] = msg
@@ -231,8 +242,9 @@ class Lime:
     def gripper(self, position, seconds=3.0):
         """Open / close the gripper. Closing on the banana, the fingers stop at the banana. The controller would
         call that a "stall" once the finger velocity is ~0, but in simulation the squeezing finger reports a
-        small velocity, so the goal may never finish. Wait at most `seconds`: the goal stays active, and the
-        controller keeps commanding the closed position, so the fingers keep squeezing."""
+        velocity (about 0.3 m/s) although it does not move, so the goal never finishes. Wait at most `seconds`:
+        the goal stays active, and the controller keeps commanding the closed position, so the fingers keep
+        squeezing."""
         goal = GripperCommand.Goal()
         goal.command.position, goal.command.max_effort = position, 10.0
         handle = self.wait(self.grip.send_goal_async(goal))
@@ -302,7 +314,7 @@ def main():
 
     def fail(text):
         log.error(text)
-        lime.send(0.0, 0.0)
+        lime.close()
         sys.exit(1)
 
     p = PoseStamped()
@@ -391,7 +403,7 @@ def main():
         fail(f"Nav2: could not park: {lime.nav.getResult()}")
     # --8<-- [end:mission]
     log.info("mission complete: the banana is in the bowl")
-    rclpy.shutdown()
+    lime.close()
 
 
 if __name__ == "__main__":

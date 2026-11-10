@@ -79,8 +79,13 @@ you put it.
        **+ Add ▸ Physics ▸ Colliders Preset**: a static collider with approximation *None* (the triangle mesh
        itself), which is allowed for an object that never moves.
     4. **Create ▸ Physics ▸ Physics Material**, tick **Rigid Body Material** and click **Ok**. Set its static and
-       dynamic friction to 1.0. Then select the banana, `gripper_left_link` and `gripper_right_link` one by one and
-       pick the new material in their **Physics materials on selected models** section.
+       dynamic friction to 1.0. Select the banana's mesh again and pick the new material in its **Physics materials
+       on selected models** section (this section appears on collider prims only).
+
+       The fingers need the same material, but the robot's finger colliders (`gripper_left_palm`,
+       `gripper_right_palm`) are *instanced*: shared, read-only copies that the GUI cannot change. The Python
+       version binds the material one level up, on `gripper_left_link` and `gripper_right_link`, and the binding
+       applies to every collider below them.
 
         ![Create ▸ Physics ▸ Physics Material asks for the material type](../assets/img/gui/13_physics_material.png){ .full }
 
@@ -154,8 +159,10 @@ flowchart LR
 !!! note "A bigger YOLO"
     `lime_full.launch.py` runs **`yolo11m.pt`** (medium) instead of tutorial 10's `yolo11n.pt` (nano). Seen from
     the low camera, the banana is a flat yellow crescent: the nano model calls it a *frisbee* (0.44), the small one
-    a banana with 0.46, the medium one a banana with 0.88. The medium model takes about 75 ms per image on the CPU,
-    which is fine at 5 images per second. Choose it with `yolo_model:=...`.
+    a banana with 0.46, the medium one a banana with 0.88. (In tutorial 10 the nano model just finds the banana,
+    with 0.40. Here the banana has physics and rests a few millimetres differently, and the nano model's answer
+    tips over to *frisbee*.) The medium model takes about 75 ms per image on the CPU, which is fine at 5 images per
+    second. Choose it with `yolo_model:=...`.
 
 YOLO says *"banana, 0.9, in this box"*: pixels, not metres. The aligned depth image (tutorial 08) has, for every
 pixel $(u, v)$, the distance $z$ along the camera's axis. The camera model from `camera_info` turns that into a
@@ -202,8 +209,8 @@ Two rules keep this simple:
 
 - **Look from the side, then drive blind.** From the start the camera sees the banana almost end-on, and its far
   half hides behind its near half (the estimate was 5 cm short). So the robot looks again from 45 cm away and
-  55° further round. Then it drives the last 30 cm blind: close up, the low camera no longer sees the banana (at
-  16 cm it is below the image's lower edge), and Isaac Sim's odometry was within 3 mm of the truth after a 0.8 m
+  55° further round. Then it drives the last 30 cm blind: close up, the low camera no longer sees the banana properly (at
+  16 cm the image's lower edge cuts it off), and Isaac Sim's odometry was within 3 mm of the truth after a 0.8 m
   drive in tutorial 07.
 - **Go round obstacles that Nav2 can't see.** The mug, the banana and the bowl are lower than the LiDAR's scan
   plane (16 cm), so they are not in Nav2's map. The mission approaches the bowl from its open side.
@@ -219,7 +226,8 @@ For a grasp from straight above, the Lime's 6-joint arm becomes simple:
 
 - `joint1` turns towards the object;
 - `joint2` (shoulder) and `joint3` (elbow) form a **planar two-link arm** with lengths $L_1 = 12.4$ cm and
-  $L_2 = 10.45$ cm, which puts the wrist $L_3 = 16.25$ cm above the fingertips;
+  $L_2 = 10.45$ cm, which puts the wrist $L_3 = 16.25$ cm above `end_effector_link` (the fingertips reach 2 cm
+  lower still);
 - `joint5` makes the three tilts add up to 180°, so the gripper points down;
 - `joint6` turns the fingers across the banana.
 
@@ -234,8 +242,8 @@ $$
 
 The mission computes these joint angles and gives them to **MoveIt as joint goals**. MoveIt still does the
 planning: a collision-free, smooth trajectory that respects the joint limits (the mission adds the floor to
-MoveIt's planning scene first). The grasp goes 10 cm above the banana, down to 3 cm, closes the gripper, then lifts
-to 15 cm.
+MoveIt's planning scene first). The grasp puts `end_effector_link` 10 cm above the floor, then down to 3 cm (the
+fingertips are then about 1 cm above the floor), closes the gripper, and lifts to 15 cm.
 
 ![Grasp: above the banana, down and close, lift](../assets/img/tutorial13_grasp.png){ .full }
 

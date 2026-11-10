@@ -534,6 +534,25 @@ async def shot_13_pick_physics():
     new = [str(p.GetPath()) for p in stage.Traverse() if str(p.GetPath()) not in before]
     print(f"[gui] Create > Physics > Physics Material: new prims {new[:5]}", flush=True)
     await shot("13_physics_material")
+    rigid = [w for w in ui_test.find_all("**/CheckBox[*]")]
+    print(f"[gui] dialog checkboxes: {len(rigid)}", flush=True)
+    labels = [w for w in ui_test.find_all("**/Label[*]") if (w.widget.text or "").strip() == "Rigid Body Material"]
+    if labels:
+        await labels[0].click()
+        await frames(10)
+    ok = [w for w in ui_test.find_all("**/Button[*]") if (w.widget.text or "").strip() == "Ok"]
+    if ok:
+        await ok[0].click()
+        await frames(60)
+    new = [str(p.GetPath()) for p in stage.Traverse() if str(p.GetPath()) not in before]
+    print(f"[gui] after Ok: new prims {new[:5]}", flush=True)
+    lime.add_lime("/World/turtlebot3_lime")
+    await frames(60)
+    finger = next(str(p.GetPath()) for p in stage.Traverse() if p.GetName() == "gripper_left_link")
+    for path in (banana, finger, str(meshes[0].GetPath())):
+        select(path)
+        await frames(60)
+        print(f"[gui] sections for {path.split('/')[-1]}: {property_sections()}", flush=True)
 
 
 SHOTS = [

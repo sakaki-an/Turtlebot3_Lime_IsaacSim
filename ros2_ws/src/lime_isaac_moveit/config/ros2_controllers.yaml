@@ -31,7 +31,8 @@ gripper_controller:
     joint: gripper_left_joint
     goal_tolerance: 0.002
     # "Stalled" = not moving for stall_timeout seconds, e.g. fingers blocked by a grasped object.
-    # allow_stalling: true reports such a grasp as success.
+    # allow_stalling: true reports such a grasp as success. (In Isaac Sim a finger squeezing an object
+    # reports a velocity although it does not move, so the stall may never be detected - see tutorial 13.)
     allow_stalling: true
     stall_velocity_threshold: 0.0005
     stall_timeout: 2.0
