@@ -40,11 +40,12 @@ Then follow the [tutorials](https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim
 | 07 | Odometry, TF, joint states, RViz | `isaac/07_odom_tf.py` + `ros2 launch lime_isaac_bringup view_robot.launch.py` |
 | 08 | Camera: RealSense D435 RGB, depth, camera_info | `isaac/08_camera.py` |
 | 09 | LiDAR (LDS-01 as RTX LiDAR) and IMU | `isaac/09_lidar_imu.py` + `ros2 launch lime_isaac_bringup view_sensors.launch.py` |
+| 10 | Object detection with YOLO (ROS 2 node, Ultralytics) | `isaac/10_yolo.py` + `ros2 launch lime_yolo yolo.launch.py` |
 | 12 | Arm control with MoveIt 2 (ros2_control over topics) | `isaac/12_moveit.py` + `ros2 launch lime_isaac_moveit moveit.launch.py` |
 
 Every script accepts `--headless`, `--test` (automatic check, prints `PASS`/`FAIL`) and `--record NAME`
 (saves the media used on the website). More tutorials are on the way: Isaac Sim basics, Python control,
-Action Graph keyboard teleop, YOLO and Nav2.
+Action Graph keyboard teleop and Nav2.
 
 ## Repository layout
 

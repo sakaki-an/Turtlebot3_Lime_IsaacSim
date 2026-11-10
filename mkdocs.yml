@@ -51,6 +51,7 @@ nav:
       - Camera (RealSense D435): tutorials/08-camera.md
       - LiDAR & IMU: tutorials/09-lidar-imu.md
   - Applications:
+      - Object detection with YOLO: tutorials/10-yolo.md
       - Arm control with MoveIt 2: tutorials/12-moveit2.md
   - Reference:
       - Troubleshooting: reference/troubleshooting.md

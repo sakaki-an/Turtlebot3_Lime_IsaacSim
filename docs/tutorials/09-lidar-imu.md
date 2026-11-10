@@ -136,4 +136,4 @@ x = −2.0 m (from the LiDAR at x = 0.027 m that is 2.03 m), and the front wall 
     An accelerometer measures *specific force*: standing still, the floor pushes the robot up against gravity.
     That is why `readGravity` is on; a real IMU behaves the same.
 
-**Next:** Object detection with YOLO (coming next).
+**Next:** [10 · Object detection with YOLO](10-yolo.md)
