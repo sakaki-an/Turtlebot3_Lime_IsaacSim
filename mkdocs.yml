@@ -42,9 +42,13 @@ nav:
   - Home: index.md
   - Getting Started:
       - Setup: tutorials/00-setup.md
+      - Isaac Sim basics & Hello World: tutorials/01-hello-world.md
   - Robot Setup:
       - Import TurtleBot3 Lime: tutorials/02-import-urdf.md
       - Tune the robot: tutorials/03-tune-robot.md
+      - Move it from Python: tutorials/04-hello-robot.md
+  - OmniGraph:
+      - Your first Action Graph: tutorials/05-action-graph.md
   - ROS 2:
       - Drive with /cmd_vel: tutorials/06-ros2-drive.md
       - Odometry, TF & RViz: tutorials/07-odom-tf.md

@@ -295,13 +295,89 @@ async def dump_labels():
         print(f"[gui][sections] {prim}: {property_sections()}", flush=True)
 
 
+async def shot_01_overview():
+    await new_scene(LIME_USD, variant=False, eye=(1.3, -1.3, 0.9), target=(0.0, 0.0, 0.2))
+    select("/World/turtlebot3_lime")
+    await frames(60)
+    await shot("01_overview")
+
+
+async def shot_05_keyboard_graph():
+    import omni.graph.core as og
+    import usdrt.Sdf
+
+    await new_scene(LIME_USD, variant=False)
+    root = f"/World/turtlebot3_lime/{lime.ARTICULATION_ROOT}"
+    keys = og.Controller.Keys
+    og.Controller.edit(  # same graph as isaac/05_action_graph.py
+        {"graph_path": "/World/KeyboardDrive", "evaluator_name": "execution"},
+        {
+            keys.CREATE_NODES: [
+                ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
+                *[(f"Key{k}", "omni.graph.nodes.ReadKeyboardState") for k in "WSAD"],
+                *[(f"ToDouble{k}", "omni.graph.nodes.ToDouble") for k in "WSAD"],
+                ("Forward", "omni.graph.nodes.Subtract"),
+                ("Turn", "omni.graph.nodes.Subtract"),
+                ("SpeedScale", "omni.graph.nodes.ConstantDouble"),
+                ("TurnScale", "omni.graph.nodes.ConstantDouble"),
+                ("Speed", "omni.graph.nodes.Multiply"),
+                ("TurnRate", "omni.graph.nodes.Multiply"),
+                ("DiffController", "isaacsim.robot.wheeled_robots.DifferentialController"),
+                ("ArticulationController", "isaacsim.core.nodes.IsaacArticulationController"),
+            ],
+            keys.SET_VALUES: [
+                *[(f"Key{k}.inputs:key", k) for k in "WSAD"],
+                ("SpeedScale.inputs:value", 0.2),
+                ("TurnScale.inputs:value", 0.8),
+                ("DiffController.inputs:wheelRadius", lime.WHEEL_RADIUS),
+                ("DiffController.inputs:wheelDistance", lime.WHEEL_BASE),
+                ("ArticulationController.inputs:targetPrim", [usdrt.Sdf.Path(root)]),
+                ("ArticulationController.inputs:jointNames", lime.WHEEL_JOINTS),
+            ],
+            keys.CONNECT: [
+                *[(f"Key{k}.outputs:isPressed", f"ToDouble{k}.inputs:value") for k in "WSAD"],
+                ("ToDoubleW.outputs:converted", "Forward.inputs:a"),
+                ("ToDoubleS.outputs:converted", "Forward.inputs:b"),
+                ("ToDoubleA.outputs:converted", "Turn.inputs:a"),
+                ("ToDoubleD.outputs:converted", "Turn.inputs:b"),
+                ("Forward.outputs:difference", "Speed.inputs:a"),
+                ("SpeedScale.inputs:value", "Speed.inputs:b"),
+                ("Turn.outputs:difference", "TurnRate.inputs:a"),
+                ("TurnScale.inputs:value", "TurnRate.inputs:b"),
+                ("OnPlaybackTick.outputs:tick", "DiffController.inputs:execIn"),
+                ("Speed.outputs:product", "DiffController.inputs:linearVelocity"),
+                ("TurnRate.outputs:product", "DiffController.inputs:angularVelocity"),
+                ("OnPlaybackTick.outputs:tick", "ArticulationController.inputs:execIn"),
+                ("DiffController.outputs:velocityCommand", "ArticulationController.inputs:velocityCommand"),
+            ],
+        },
+    )
+    await frames(10)
+    from omni.graph.window.action.action_graph_extension import ActionGraphExtension
+
+    ActionGraphExtension.show_graph([stage_utils.get_current_stage().GetPrimAtPath("/World/KeyboardDrive")])
+    await frames(120)
+    win = ui.Workspace.get_window("Action Graph")
+    win.undock()
+    await frames(5)
+    win.position_x, win.position_y, win.width, win.height = 40, 60, 1500, 760
+    await frames(60)
+    await ui_test.emulate_mouse_move(ui_test.Vec2(800, 450))
+    await frames(5)
+    await ui_test.emulate_keyboard_press(carb.input.KeyboardInput.F)
+    await frames(60)
+    await shot("05_keyboard_graph", crop=(40, 60, 1540, 820))
+
+
 SHOTS = [
     ("00_labels", dump_labels),
     ("00_node_names", print_node_ui_names),
+    ("01_overview", shot_01_overview),
     ("02_import_options", shot_02_import_options),
     ("02_physics_variant", shot_02_physics_variant),
     ("03_drive_properties", shot_03_drive_properties),
     ("03_gain_tuner", shot_03_gain_tuner),
+    ("05_keyboard_graph", shot_05_keyboard_graph),
     ("06_action_graph", shot_06_action_graph),
 ]
 

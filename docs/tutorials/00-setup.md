@@ -157,4 +157,4 @@ That message was produced by an Action Graph in Isaac Sim and received by ROS 2 
 
 More in [Troubleshooting](../reference/troubleshooting.md).
 
-**Next:** [02 · Import TurtleBot3 Lime](02-import-urdf.md)
+**Next:** [01 · Isaac Sim basics & Hello World](01-hello-world.md)

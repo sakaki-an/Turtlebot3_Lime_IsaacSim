@@ -184,4 +184,4 @@ treats more, and it prints a warning.
 From now on every tutorial loads **`assets/usd/turtlebot3_lime_tuned.usda`**. In Python that is
 `common.lime.add_lime()`.
 
-**Next:** [06 · Drive with ROS 2](06-ros2-drive.md)
+**Next:** [04 · Move it from Python](04-hello-robot.md)

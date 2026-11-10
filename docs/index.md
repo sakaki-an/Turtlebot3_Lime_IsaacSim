@@ -40,8 +40,11 @@ Each tutorial has two ways to do the same thing:
 | # | Tutorial | You will learn |
 |---|---|---|
 | 00 | [Setup](tutorials/00-setup.md) | Install Isaac Sim 6.2 (pip), start the ROS 2 Jazzy container |
+| 01 | [Isaac Sim basics & Hello World](tutorials/01-hello-world.md) | the window, USD prims and schemas, your first standalone script |
 | 02 | [Import TurtleBot3 Lime](tutorials/02-import-urdf.md) | URDF → USD with the 6.2 URDF importer, the asset structure, physics variants |
 | 03 | [Tune the robot](tutorials/03-tune-robot.md) | Joint drives, gains, friction and friction-combine modes, solver iterations |
+| 04 | [Move it from Python](tutorials/04-hello-robot.md) | the Articulation API: wheels, arm, gripper |
+| 05 | [Your first Action Graph](tutorials/05-action-graph.md) | OmniGraph basics: keyboard driving |
 | 06 | [Drive with ROS 2](tutorials/06-ros2-drive.md) | ROS 2 bridge, Action Graph, `/clock`, `/cmd_vel`, differential controller |
 | 07 | [Odometry, TF & RViz](tutorials/07-odom-tf.md) | `/odom`, TF tree, `/joint_states`, `robot_state_publisher`, RViz |
 | 08 | [Camera (RealSense D435)](tutorials/08-camera.md) | RGB, depth, camera_info; optical frames; the lime_room scene |
@@ -50,8 +53,7 @@ Each tutorial has two ways to do the same thing:
 | 11 | [Navigation with Nav2](tutorials/11-nav2.md) | occupancy map from the scene, Jazzy Nav2 parameters for the Lime, AMCL, goals |
 | 12 | [Arm control with MoveIt 2](tutorials/12-moveit2.md) | ros2_control over topics, MoveIt 2 on Jazzy, planning from RViz and Python |
 
-More tutorials, all verified on Isaac Sim 6.2, are added as they are finished: the Isaac Sim basics,
-Python control and your first Action Graph.
+Every tutorial was run on Isaac Sim 6.2 and checked with its `--test` mode (`tools/run_all_checks.sh`).
 
 ## What you need
 
