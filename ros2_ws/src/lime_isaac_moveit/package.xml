@@ -11,7 +11,6 @@
 
   <exec_depend>turtlebot3_lime_description</exec_depend>
   <exec_depend>turtlebot3_lime_moveit_config</exec_depend>
-  <exec_depend>lime_isaac_bringup</exec_depend>
   <exec_depend>joint_state_topic_hardware_interface</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>

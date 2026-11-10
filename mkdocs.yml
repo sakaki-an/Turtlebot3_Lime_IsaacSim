@@ -58,6 +58,7 @@ nav:
       - Object detection with YOLO: tutorials/10-yolo.md
       - Navigation with Nav2: tutorials/11-nav2.md
       - Arm control with MoveIt 2: tutorials/12-moveit2.md
+      - Putting it all together: tutorials/13-all-together.md
   - Reference:
       - Troubleshooting: reference/troubleshooting.md
       - Credits & license: reference/credits.md

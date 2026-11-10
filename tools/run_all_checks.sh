@@ -101,6 +101,11 @@ check_with_ros 12 isaac/12_moveit.py tutorial12_moveit \
    for i in $(seq 1 90); do grep -a -q "You can start planning now" /tmp/lime_home/moveit.log && break; sleep 1; done; sleep 3
    timeout 120 ros2 run lime_isaac_moveit arm_demo --pose demo --gripper open'
 
+check_with_ros 13 isaac/13_all_together.py tutorial13_all_together \
+  'ros2 launch lime_isaac_bringup lime_full.launch.py rviz:=false > /tmp/lime_home/full.log 2>&1 &
+   for i in $(seq 1 150); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/full.log && grep -a -q "You can start planning now" /tmp/lime_home/full.log && break; sleep 1; done; sleep 5
+   timeout 400 ros2 run lime_isaac_bringup mission' 900
+
 echo
 echo "=== Summary ==="
 fail=0
