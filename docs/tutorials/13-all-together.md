@@ -129,7 +129,8 @@ the robot's real pose and joint angles:
 - **Pick things up.** The gripper and MoveIt are ready. Add a grasp pose above a detected object, using the depth image
   from tutorial 08 for the distance.
 - **Train your own detector.** Isaac Sim's Replicator can render thousands of labelled images of the lime_room.
-- **The real robot.** The ROS side uses the real Lime's topic and frame names, so the same launch files can drive
-  real hardware with the real drivers.
+- **The real robot.** The ROS side uses the real Lime's topic and frame names, so moving to hardware is mostly a
+  matter of swapping the simulation for the real drivers (the `JointStateTopicSystem` for the Lime's own ros2_control
+  hardware, the RealSense and LDS drivers). This was not tested on a real Lime.
 
 Happy simulating! 🍋

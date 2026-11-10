@@ -38,18 +38,18 @@ flowchart LR
   time[Isaac Read<br/>Simulation Time]
   clock[ROS2 Publish Clock<br/><i>/clock</i>]
   twist[ROS2 Subscribe Twist<br/><i>/cmd_vel</i>]
-  bl[Break Vector3]
-  ba[Break Vector3]
+  bl[Break 3-Vector]
+  ba[Break 3-Vector]
   diff[Differential Controller<br/>r = 0.06, L = 0.29425]
   art[Articulation Controller<br/>wheel_left_joint, wheel_right_joint]
   tick --> clock
-  time -- simulationTime --> clock
+  time -- "simulationTime" --> clock
   tick --> twist
   tick --> art
-  twist -- execOut --> diff
-  twist -- linearVelocity --> bl -- x --> diff
-  twist -- angularVelocity --> ba -- z --> diff
-  diff -- velocityCommand --> art
+  twist -- "execOut" --> diff
+  twist -- "linearVelocity" --> bl -- "x" --> diff
+  twist -- "angularVelocity" --> ba -- "z" --> diff
+  diff -- "velocityCommand" --> art
 ```
 
 ## Build it
@@ -148,8 +148,8 @@ Look at the clock as well:
 
 !!! success "Automatic check"
     `python isaac/06_ros2_drive.py --headless --test` waits for `/cmd_vel` messages, then checks that the
-    robot moved more than 0.3 m. With the `topic pub` command above it reports
-    `robot moved 0.75 m … PASS`.
+    robot moved more than 0.3 m from its start. With the `topic pub` command above (12 s on a circle of 0.5 m
+    radius) it reports `robot moved 0.47 m … PASS`.
 
 ![Driving](../assets/img/tutorial06_ros2_drive.png){ .full }
 

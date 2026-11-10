@@ -18,7 +18,12 @@ It includes or is derived from the following third-party work:
    Copyright (c) 2025 An - MIT License
    Used as the reference for topic and controller names (Isaac Sim 4.5 / Humble version).
 
-3. Intel RealSense D435 mesh (assets/urdf/meshes/d435.dae)
+3. Nav2 (nav2_bringup), https://github.com/ros-navigation/navigation2 - Apache License 2.0
+   ros2_ws/src/lime_isaac_bringup/config/nav2_params.yaml is generated from nav2_bringup's
+   params/nav2_params.yaml (Jazzy); rviz/navigation.rviz is a modified copy of its
+   rviz/nav2_default_view.rviz.
+
+4. Intel RealSense D435 mesh (assets/urdf/meshes/d435.dae)
    From realsense2_description, https://github.com/IntelRealSense/realsense-ros
    Copyright Intel Corporation - Apache License 2.0
 

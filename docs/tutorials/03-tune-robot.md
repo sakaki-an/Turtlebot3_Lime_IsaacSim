@@ -44,11 +44,11 @@ material of its own) uses PhysX's default material, which has friction > 0. The 
 **not** 0. The caster pads carry the heavy battery at the back, and that friction brakes the robot.
 Setting the caster material's combine mode to **min** makes its 0.0 win.
 
-Measured with the script (both wheels at 5 rad/s for 3 s, ideal distance 0.90 m):
+Measured on the final tuned asset (both wheels at 5 rad/s for 3 s, ideal distance 0.90 m):
 
 | Caster material | Floor | Distance | Wheel speed |
 |---|---|---|---|
-| friction 0, combine *average* | default material | 0.68 m | 2.5 / 3.2 rad/s (and it curves) |
+| friction 0, combine *average* | default material | 0.67 m | 1.2 / 2.4 rad/s (and it curves) |
 | friction 0, combine *average* | friction set to 0 | 0.87 m | 5.0 rad/s |
 | friction 0, combine **min** | default material | **0.87 m** | **5.0 rad/s** |
 
@@ -76,7 +76,7 @@ purpose *guide*) to each wheel link. The visible tyre mesh is unchanged.
 
 An articulation (the robot's joint tree) is solved iteratively. Raising the articulation's
 **position iterations from 32 (default) to 64** made the drive test slightly more accurate:
-0.849 m → 0.874 m in the run above. Keep **velocity iterations ≤ 4**. PhysX's TGS solver changed how it
+0.847 m → 0.874 m in the run above. Keep **velocity iterations ≤ 4**. PhysX's TGS solver changed how it
 treats more, and it prints a warning.
 
 ## The values
@@ -116,7 +116,8 @@ treats more, and it prints a warning.
     material in **Property ▸ Physics materials on selected models**. Do not use the *Materials on
     selected models* section: that one is for the visual look.
 
-    **Sphere tyres.** For each `wheel_*_link`: select its `cylinder` and untick **Collider ▸ Collision Enabled**.
+    **Sphere tyres** (these GUI steps describe what the script does; the script is the verified path).
+    For each `wheel_*_link`: select its `cylinder` and untick **Collider ▸ Collision Enabled**.
     Then right-click the link and choose **Create ▸ Shape ▸ Sphere**. Set its *Radius* to `0.06` and *Purpose* to
     `guide` (not rendered). Add a collider with **Add ▸ Physics ▸ Collider** and bind the tyre physics material.
 
@@ -178,7 +179,7 @@ treats more, and it prints a warning.
 
 !!! tip "Experiment"
     Change `ARM_DRIVE = dict(stiffness=200.0, ...)` to `stiffness=20.0` and re-run: the arm sags.
-    Change the caster combine mode back to `"average"`: the robot covers only about 0.68 m and the
+    Change the caster combine mode back to `"average"`: the robot covers only about 0.67 m, curves, and the
     distance test fails.
 
 From now on every tutorial loads **`assets/usd/turtlebot3_lime_tuned.usda`**. In Python that is

@@ -28,11 +28,11 @@ flowchart LR
     mg[move_group<br/>MoveIt 2]
     rsp[robot_state_publisher]
   end
-  pjs -- /isaac_joint_states --> hw
-  hw -- /isaac_joint_commands --> sjs
-  mg -- FollowJointTrajectory --> jtc --> hw
-  mg -- GripperCommand --> grip --> hw
-  hw --> jsb -- /joint_states --> rsp & mg
+  pjs -- "/isaac_joint_states" --> hw
+  hw -- "/isaac_joint_commands" --> sjs
+  mg -- "FollowJointTrajectory" --> jtc --> hw
+  mg -- "GripperCommand" --> grip --> hw
+  hw --> jsb -- "/joint_states" --> rsp & mg
 ```
 
 - **ros2_control** is the standard ROS 2 layer between controllers and hardware. On the real Lime the
@@ -114,7 +114,8 @@ In RViz's **MotionPlanning** panel: *Planning Group* `arm`, drag the interactive
 ## Porting the Lime's MoveIt config from Humble to Jazzy
 
 The upstream `turtlebot3_lime_moveit_config` was written for Humble and real hardware. These are the
-changes this tutorial needed. Each one was found by running it:
+changes this tutorial needed. The first two come from the Jazzy migration notes; every other row was found by
+running it:
 
 | Symptom | Cause | Fix (in `lime_isaac_moveit`) |
 |---|---|---|

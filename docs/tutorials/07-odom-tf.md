@@ -28,8 +28,8 @@ flowchart LR
 - **`odom → base_footprint`** is how far the robot has driven since it started. Isaac Sim publishes it,
   because Isaac Sim is the robot.
 - **Everything below `base_footprint`** comes from the URDF. `robot_state_publisher` (in the ROS container)
-  reads the URDF and `/joint_states` and publishes those transforms. This is exactly how a real robot works,
-  so the same ROS launch files work in simulation and on the real Lime.
+  reads the URDF and `/joint_states` and publishes those transforms. A real robot is organised the same way,
+  with the same frame and topic names.
 
 !!! info "Who publishes what"
     | Topic / transform | Publisher |

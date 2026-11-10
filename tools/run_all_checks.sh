@@ -90,7 +90,8 @@ check_with_ros 10 isaac/10_yolo.py "" \
   'ros2 launch lime_yolo yolo.launch.py > /tmp/lime_home/yolo.log 2>&1 & sleep 60'
 
 check 11 isaac/11_make_map.py tutorial11_map 600
-RESULT[11map]=${RESULT[11]:-}; unset 'RESULT[11]'
+# the map check prints [11][test] too: file its result under "11map" (only if it ran)
+if [ -n "${RESULT[11]:-}" ]; then RESULT[11map]=${RESULT[11]}; unset 'RESULT[11]'; fi
 check_with_ros 11 isaac/11_nav2.py tutorial11_nav2 \
   'ros2 launch lime_isaac_bringup navigation.launch.py rviz:=false > /tmp/lime_home/nav2.log 2>&1 &
    for i in $(seq 1 90); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/nav2.log && break; sleep 1; done; sleep 5

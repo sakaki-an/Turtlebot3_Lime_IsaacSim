@@ -111,7 +111,7 @@ def physics_material(path: str, friction: float, combine_mode: str = "average") 
     api.CreateRestitutionAttr(0.0)
     # When two materials touch, PhysX COMBINES their friction - by default it takes the AVERAGE.
     # A 0.0-friction caster on a floor with friction > 0 still gets friction > 0 and brakes the robot
-    # (measured: 0.68 m instead of 0.87 m in the drive test below). "min" makes the caster's 0.0 win.
+    # (measured: 0.67 m instead of 0.87 m in the drive test below). "min" makes the caster's 0.0 win.
     PhysxSchema.PhysxMaterialAPI.Apply(mat.GetPrim()).CreateFrictionCombineModeAttr(combine_mode)
     return mat
 
