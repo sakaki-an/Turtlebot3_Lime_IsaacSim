@@ -86,6 +86,13 @@ check 09 isaac/09_lidar_imu.py tutorial09_lidar_imu
 check_with_ros 10 isaac/10_yolo.py "" \
   'ros2 launch lime_yolo yolo.launch.py > /tmp/lime_home/yolo.log 2>&1 & sleep 60'
 
+check 11 isaac/11_make_map.py tutorial11_map 600
+RESULT[11map]=${RESULT[11]:-}; unset 'RESULT[11]'
+check_with_ros 11 isaac/11_nav2.py tutorial11_nav2 \
+  'ros2 launch lime_isaac_bringup navigation.launch.py rviz:=false > /tmp/lime_home/nav2.log 2>&1 &
+   for i in $(seq 1 90); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/nav2.log && break; sleep 1; done; sleep 5
+   timeout 200 ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 3.2, y: -1.8}, orientation: {w: 1.0}}}}"'
+
 check_with_ros 12 isaac/12_moveit.py tutorial12_moveit \
   'ros2 launch lime_isaac_moveit moveit.launch.py rviz:=false > /tmp/lime_home/moveit.log 2>&1 &
    for i in $(seq 1 90); do grep -a -q "You can start planning now" /tmp/lime_home/moveit.log && break; sleep 1; done; sleep 3

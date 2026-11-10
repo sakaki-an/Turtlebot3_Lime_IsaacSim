@@ -144,4 +144,4 @@ changes this tutorial needed. Each one was found by running it:
 
 `tools/run_all_checks.sh 12` starts MoveIt and `arm_demo` in the container for you.
 
-**Next:** Navigation with Nav2 (coming next).
+**Next:** Putting it all together (coming next).

@@ -52,6 +52,7 @@ nav:
       - LiDAR & IMU: tutorials/09-lidar-imu.md
   - Applications:
       - Object detection with YOLO: tutorials/10-yolo.md
+      - Navigation with Nav2: tutorials/11-nav2.md
       - Arm control with MoveIt 2: tutorials/12-moveit2.md
   - Reference:
       - Troubleshooting: reference/troubleshooting.md

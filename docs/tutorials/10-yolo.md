@@ -105,4 +105,4 @@ passes when at least 3 of the 4 placed objects are detected. Start the detector 
     objects from an unusual angle, and the COCO photos rarely show them that way. A real robot has the same
     problem. Simulation lets you see it, and generate training images for it, before the robot exists.
 
-**Next:** Navigation with Nav2 (coming next).
+**Next:** [11 · Navigation with Nav2](11-nav2.md)
