@@ -11,7 +11,7 @@ and every step is written for people who are **opening Isaac Sim for the first t
 <video controls autoplay loop muted playsinline>
   <source src="assets/video/tutorial13_all_together.mp4" type="video/mp4">
 </video>
-<figcaption>The final tutorial: Nav2 drives the Lime through its room, YOLO finds the objects, MoveIt points the arm at the bottle. Everything simulated in Isaac Sim 6.2 and controlled from ROS 2 Jazzy.</figcaption>
+<figcaption>The final tutorial: YOLO and the depth camera find the banana, MoveIt picks it up and puts it into the bowl, and Nav2 parks the Lime. Everything simulated in Isaac Sim 6.2 and controlled from ROS 2 Jazzy.</figcaption>
 </figure>
 
 ## How each tutorial works
@@ -52,7 +52,7 @@ Each tutorial has two ways to do the same thing:
 | 10 | [Object detection with YOLO](tutorials/10-yolo.md) | a ROS 2 YOLO node on simulated images, `vision_msgs/Detection2DArray` |
 | 11 | [Navigation with Nav2](tutorials/11-nav2.md) | occupancy map from the scene, Jazzy Nav2 parameters for the Lime, AMCL, goals |
 | 12 | [Arm control with MoveIt 2](tutorials/12-moveit2.md) | ros2_control over topics, MoveIt 2 on Jazzy, planning from RViz and Python |
-| 13 | [Putting it all together](tutorials/13-all-together.md) | everything at once and a mission: Nav2 + YOLO + MoveIt 2 |
+| 13 | [Putting it all together: pick and place](tutorials/13-all-together.md) | everything at once: YOLO + depth find the banana, MoveIt 2 picks it up and puts it into the bowl, Nav2 parks |
 
 Every tutorial was run on Isaac Sim 6.2 and checked with its `--test` mode (`tools/run_all_checks.sh`).
 

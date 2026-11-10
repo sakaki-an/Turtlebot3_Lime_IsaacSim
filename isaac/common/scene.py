@@ -84,6 +84,53 @@ def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = T
     return root
 
 
+# --8<-- [start:setup_pick_and_place]
+BOWL_SCALE = 1.5  # tutorial 13: the 19 cm banana fits into a 24 cm bowl, not into the 16 cm original
+
+
+def setup_pick_and_place(stage, robot_path: str, root: str = "/World/LimeRoom"):
+    """Tutorial 13: turn the banana into a real object the gripper can hold, and the bowl into a container.
+
+    In tutorials 08-12 the objects are only pictures for the camera: no collider, no mass. Here:
+      * banana: rigid body (it falls, can be pushed and lifted), 66 g, a convex-decomposition collider
+        (a single convex hull would make the curved banana a 7 cm wide blob, too wide for the gripper)
+      * bowl:   1.5x bigger, a static collider that keeps its exact (concave) shape
+      * fingers and banana: rubber-like friction 1.0, so a 10 N squeeze holds the banana
+    """
+    from isaacsim.core.experimental.prims import XformPrim
+    from pxr import PhysxSchema, Usd, UsdGeom, UsdPhysics, UsdShade
+
+    def colliders(prim, approximation):
+        for p in Usd.PrimRange(prim):
+            if p.IsA(UsdGeom.Mesh):
+                UsdPhysics.CollisionAPI.Apply(p)
+                UsdPhysics.MeshCollisionAPI.Apply(p).CreateApproximationAttr(approximation)
+
+    banana = stage.GetPrimAtPath(f"{root}/Objects/Banana")
+    UsdPhysics.RigidBodyAPI.Apply(banana)
+    UsdPhysics.MassAPI.Apply(banana).CreateMassAttr(0.066)
+    body = PhysxSchema.PhysxRigidBodyAPI.Apply(banana)
+    body.CreateSolverPositionIterationCountAttr(32)  # an object squeezed between two fingers needs more iterations
+    colliders(banana, "convexDecomposition")
+
+    bowl_path = f"{root}/Objects/Bowl"
+    _name, _asset, x, y, _yaw, half_height, _up, _coco = next(o for o in OBJECTS if o[0] == "Bowl")
+    bowl = XformPrim(bowl_path)
+    bowl.set_local_scales([[BOWL_SCALE] * 3])
+    position, orientation = bowl.get_world_poses()
+    bowl.set_world_poses(positions=[[x, y, BOWL_SCALE * half_height + 0.002]], orientations=orientation)
+    colliders(stage.GetPrimAtPath(bowl_path), "none")  # "none" = the triangle mesh itself (static objects only)
+
+    rubber = UsdShade.Material.Define(stage, f"{root}/PhysicsMaterials/rubber")
+    api = UsdPhysics.MaterialAPI.Apply(rubber.GetPrim())
+    api.CreateStaticFrictionAttr(1.0)
+    api.CreateDynamicFrictionAttr(1.0)
+    fingers = [p for p in Usd.PrimRange(stage.GetPrimAtPath(robot_path)) if p.GetName() in ("gripper_left_link", "gripper_right_link")]
+    for prim in [banana, *fingers]:
+        UsdShade.MaterialBindingAPI.Apply(prim).Bind(rubber, UsdShade.Tokens.weakerThanDescendants, "physics")
+# --8<-- [end:setup_pick_and_place]
+
+
 if __name__ == "__main__":
     # Write assets/scenes/lime_room.usda (used by the GUI instructions).
     import sys

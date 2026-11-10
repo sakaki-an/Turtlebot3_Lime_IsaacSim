@@ -8,7 +8,7 @@ The tutorials follow the structure of NVIDIA's Isaac Sim tutorials. Each one has
 a **standalone Python script**, and a video of the result. **ROS 2 Jazzy** (Nav2, MoveIt 2, YOLO) runs in
 a Docker container next to Isaac Sim.
 
-![TurtleBot3 Lime in its room in Isaac Sim, driven by Nav2](docs/assets/img/tutorial13_all_together.png)
+![TurtleBot3 Lime puts a banana into a bowl in Isaac Sim](docs/assets/img/tutorial13_all_together.png)
 
 ## Quick start
 
@@ -46,7 +46,7 @@ Then follow the [tutorials](https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim
 | 10 | Object detection with YOLO (ROS 2 node, Ultralytics) | `isaac/10_yolo.py` + `ros2 launch lime_yolo yolo.launch.py` |
 | 11 | Navigation with Nav2 (map from the scene, AMCL, goals) | `isaac/11_make_map.py`, `isaac/11_nav2.py` + `ros2 launch lime_isaac_bringup navigation.launch.py` |
 | 12 | Arm control with MoveIt 2 (ros2_control over topics) | `isaac/12_moveit.py` + `ros2 launch lime_isaac_moveit moveit.launch.py` |
-| 13 | Putting it all together: Nav2 + YOLO + MoveIt 2 mission | `isaac/13_all_together.py` + `ros2 launch lime_isaac_bringup lime_full.launch.py` |
+| 13 | Putting it all together: pick and place (YOLO + depth, MoveIt 2, Nav2) | `isaac/13_all_together.py` + `ros2 launch lime_isaac_bringup lime_full.launch.py` |
 
 Every script accepts `--headless`, `--test` (automatic check, prints `PASS`/`FAIL`) and `--record NAME`
 (saves the media used on the website). `tools/run_all_checks.sh` runs every check.

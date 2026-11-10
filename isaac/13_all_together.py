@@ -10,6 +10,8 @@
 Everything from tutorials 06-12 in one scene:
     /clock  /cmd_vel  /odom  /tf  /isaac_joint_states  /isaac_joint_commands
     /camera/camera/...  /scan  /imu
+New here: the banana is a real object (rigid body, collider, mass) the gripper can pick up, and the bowl a
+container to put it in (common/scene.py: setup_pick_and_place).
 """
 
 import sys
@@ -26,8 +28,8 @@ import isaacsim.core.experimental.utils.app as app_utils
 import isaacsim.core.experimental.utils.stage as stage_utils
 import numpy as np
 from common import graphs, lime, sensors
-from common.scene import build_lime_room
-from isaacsim.core.experimental.prims import Articulation
+from common.scene import OBJECTS, build_lime_room, setup_pick_and_place
+from isaacsim.core.experimental.prims import Articulation, XformPrim
 from isaacsim.core.simulation_manager import SimulationManager
 
 graphs.enable_ros2_realtime(simulation_app)
@@ -38,6 +40,7 @@ while stage_utils.is_stage_loading():
     simulation_app.update()
 robot_path = "/World/turtlebot3_lime"
 articulation_root = lime.add_lime(robot_path)
+setup_pick_and_place(stage, robot_path)  # the banana can be picked up, the bowl holds it
 
 graphs.create_clock_graph()  # 06
 graphs.create_drive_graph(articulation_root)  # 06  /cmd_vel   <- Nav2
@@ -51,7 +54,9 @@ recorder = None
 if args.record:
     from common.recorder import Recorder
 
-    recorder = Recorder(args.record, eye=(0.9, -4.4, 3.6), target=(1.0, -0.4, 0.0), every_n=6, fps=20)
+    CLOSE_UP = ((1.75, -1.05, 0.85), (0.85, 0.12, 0.05))  # pick and place
+    OVERVIEW = ((0.9, -4.4, 3.6), (1.0, -0.4, 0.0))  # parking
+    recorder = Recorder(args.record, eye=CLOSE_UP[0], target=CLOSE_UP[1], every_n=8, fps=24)
 
 SimulationManager.setup_simulation(dt=1.0 / 60.0)
 app_utils.play()
@@ -61,40 +66,62 @@ arm = robot.get_dof_indices(lime.ARM_JOINTS)
 print("[13] ready: ros2 launch lime_isaac_bringup lime_full.launch.py, then ros2 run lime_isaac_bringup mission", flush=True)
 
 # --test: follow the mission from the simulation's point of view (ground truth)
-CORNER, START = np.array([2.8, -1.8]), np.array([0.0, 0.0])
-events, steps = {}, 0
+banana = XformPrim("/World/LimeRoom/Objects/Banana")
+BOWL = np.array(next(o for o in OBJECTS if o[0] == "Bowl")[2:4])
+CORNER = np.array([2.8, -1.8])
+events, steps, still_since, view_blend, still_frame = {}, 0, None, 0.0, -1
+if args.test or args.record:
+    print(f"[13] ground truth: banana at {np.round(banana.get_world_poses()[0].numpy()[0, :2], 3)}, bowl at {BOWL}", flush=True)
+
+
+def event(name, text):
+    events[name] = steps / 60
+    print(f"[13] {text} at t = {events[name]:.0f} s", flush=True)
+
+
 while simulation_app.is_running():
     simulation_app.update()
     steps += 1
     if recorder:
+        if "folded" in events and view_blend < 1.0:  # glide from the close-up to the overview for the parking
+            view_blend = min(1.0, view_blend + 1 / 180)
+            a = 0.5 - 0.5 * np.cos(np.pi * view_blend)
+            recorder.look_at(*[(1 - a) * np.array(c) + a * np.array(o) for c, o in zip(CLOSE_UP, OVERVIEW)])
         recorder.capture()
     if args.test or args.record:
         xy = robot.get_world_poses()[0].numpy()[0, :2]
         q = robot.get_dof_positions(dof_indices=arm).numpy()[0]
-        joint1 = float(q[0])
-        if "corner" not in events and np.linalg.norm(xy - CORNER) < 0.3:
-            events["corner"] = steps / 60
-            print(f"[13] reached the far corner at t = {events['corner']:.0f} s", flush=True)
-        if "corner" in events and "back" not in events and np.linalg.norm(xy - START) < 0.3:
-            events["back"] = steps / 60
-            print(f"[13] back at the start at t = {events['back']:.0f} s", flush=True)
-        if "back" in events and "pointed" not in events and abs(joint1) > 0.15:
-            events["pointed"] = steps / 60
-            print(f"[13] arm turned to point (joint1 = {np.degrees(joint1):.0f} deg) at t = {events['pointed']:.0f} s", flush=True)
-        if "pointed" in events and "folded" not in events and np.max(np.abs(q - np.array(lime.ARM_HOME))) < 0.05:
-            events["folded"] = steps / 60
-            print(f"[13] arm folded again at t = {events['folded']:.0f} s", flush=True)
-        if ("folded" in events and steps / 60 > events["folded"] + 5) or steps > 400 * 60:
+        b = banana.get_world_poses()[0].numpy()[0]
+        if "lifted" not in events and b[2] > 0.10:
+            event("lifted", f"banana lifted ({b[2] * 100:.0f} cm above the floor)")
+        in_bowl = np.linalg.norm(b[:2] - BOWL) < 0.07 and b[2] < 0.10
+        still_since = (still_since or steps) if in_bowl else None
+        if "lifted" in events and "in_bowl" not in events and still_since and steps - still_since > 60:
+            event("in_bowl", f"banana in the bowl, {np.linalg.norm(b[:2] - BOWL) * 100:.1f} cm from its centre")
+        if "in_bowl" in events and "folded" not in events and np.max(np.abs(q - np.array(lime.ARM_HOME))) < 0.05:
+            event("folded", "arm folded")
+            still_frame = len(recorder.frames) - 1 if recorder else -1  # the picture for the docs: banana in the bowl
+        if "folded" in events and "parked" not in events and np.linalg.norm(xy - CORNER) < 0.3:
+            event("parked", "robot parked in the far corner")
+        if ("parked" in events and steps / 60 > events["parked"] + 5) or steps > 500 * 60:
             break  # (5 s more, so the mission can finish cleanly)
 
 ok = True
 if args.test:
-    for name in ("corner", "back", "pointed", "folded"):
-        print(f"[13][check] {'ok  ' if name in events else 'FAIL'} {name}")
-    ok = all(n in events for n in ("corner", "back", "pointed", "folded"))
+    b = banana.get_world_poses()[0].numpy()[0]
+    checks = {
+        "banana picked up (more than 10 cm above the floor)": "lifted" in events,
+        "banana put into the bowl (within 7 cm of its centre)": "in_bowl" in events,
+        "arm folded afterwards": "folded" in events,
+        "robot parked in the far corner (within 0.3 m)": "parked" in events,
+        f"banana still in the bowl at the end ({np.linalg.norm(b[:2] - BOWL) * 100:.1f} cm from its centre)": np.linalg.norm(b[:2] - BOWL) < 0.07,
+    }
+    for text, passed in checks.items():
+        print(f"[13][check] {'ok  ' if passed else 'FAIL'} {text}")
+    ok = all(checks.values())
     print(f"[13][test] {'PASS' if ok else 'FAIL'}")
 if recorder:
-    recorder.save()
+    recorder.save(still_index=still_frame)
 app_utils.stop()
 simulation_app.close(exit_code=0 if ok else 1)
 sys.exit(0 if ok else 1)

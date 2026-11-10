@@ -85,7 +85,7 @@ treats more, and it prints a warning.
 |---|---|
 | Wheels (×2) | velocity drive: stiffness 0, damping 100 N·m·s/rad, max force 3 N·m (XM430-W210) |
 | Arm joints (×6) | position drive: stiffness 200 N·m/rad, damping 10 N·m·s/rad, max force 4.1 N·m (XM430-W350 stall torque) |
-| Arm start pose | the SRDF `home` pose `[0, -1.10, 1.85, 0, 0.98, 0]` rad, as both the drive target and the initial joint state (upstream uses 1.87 for `joint3`, which is outside its own URDF limit of 1.8567; MoveIt rejects that in tutorial 12) |
+| Arm start pose | the SRDF `home` pose `[0, -1.10, 1.80, 0, 0.98, 0]` rad, as both the drive target and the initial joint state (upstream uses 1.87 for `joint3`, which is outside its own URDF limit of 1.8567; MoveIt rejects that in tutorial 12. 1.80 leaves a margin for the arm sagging under gravity) |
 | Gripper (left) | position drive: stiffness 1000 N/m, damping 20 N·s/m, max force 10 N |
 | Gripper (right) | no drive. It follows the left finger through its mimic joint |
 | Tyres / casters | friction 1.0 (average) / friction 0.0 (**min**) |

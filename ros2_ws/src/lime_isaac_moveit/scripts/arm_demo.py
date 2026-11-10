@@ -20,7 +20,7 @@ from rclpy.action import ActionClient
 
 ARM_JOINTS = [f"joint{i}" for i in range(1, 7)]
 POSES = {  # radians
-    "home": [0.0, -1.10, 1.85, 0.0, 0.98, 0.0],  # folded (SRDF "home")
+    "home": [0.0, -1.10, 1.80, 0.0, 0.98, 0.0],  # folded (SRDF "home")
     "demo": [0.0, -0.6, 0.3, 0.0, 1.2, 0.0],  # reach forward, gripper pointing down/forward
     "left": [1.2, -0.6, 0.3, 0.0, 1.2, 0.0],
 }

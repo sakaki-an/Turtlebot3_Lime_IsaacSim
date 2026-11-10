@@ -68,9 +68,9 @@ def Xform "turtlebot3_lime" (
             float drive:angular:physics:damping = 0.17453292
             float drive:angular:physics:maxForce = 4.1
             float drive:angular:physics:stiffness = 3.4906585
-            float drive:angular:physics:targetPosition = 105.99719
+            float drive:angular:physics:targetPosition = 103.1324
             uniform token drive:angular:physics:type = "force"
-            float state:angular:physics:position = 105.99719
+            float state:angular:physics:position = 103.1324
         }
 
         over "joint4" (

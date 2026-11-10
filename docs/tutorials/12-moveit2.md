@@ -125,7 +125,7 @@ running it:
 | `topic_based_ros2_control` not available on Jazzy | package renamed | `joint_state_topic_hardware_interface/JointStateTopicSystem` (same parameters) |
 | `The requested state interface not found: 'wheel_left_joint/effort'`; hardware deactivated | Isaac Sim's JointState carries effort too, and the topic system copies every field | declare `position`, `velocity` **and** `effort` state interfaces |
 | Arm never moves; Isaac Sim warns *"ensure size of position … arrays match the number of actuators"* | wheels (state only) and arm in one component: the command message had 9 names but 7 positions | two hardware components, `IsaacArm` (commands) and `IsaacWheels` (state only) |
-| MoveIt: `Start state out of bounds … joint3` | SRDF `home` has `joint3 = 1.87` but the URDF limit is 1.8567 | `home` uses 1.85 |
+| MoveIt: `Start state out of bounds … joint3` | SRDF `home` has `joint3 = 1.87` but the URDF limit is 1.8567 | `home` uses 1.80: with 1.85 the arm, sagging a few milliradians, could still end up on the limit |
 | `No acceleration limit was defined for joint joint1` | Jazzy's time parameterization needs acceleration limits | own `joint_limits.yaml` with `max_acceleration` |
 | "SUCCESS" although the arm did not move | without goal tolerances, a trajectory controller reports success when the time is over | `arm_controller.constraints.<joint>.goal: 0.05` |
 | Gripper "stalled at 0.0" immediately | stall detection fired before the finger started | `stall_timeout: 2.0`, `stall_velocity_threshold: 0.0005` |

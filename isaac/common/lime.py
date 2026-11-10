@@ -19,8 +19,9 @@ GRIPPER_CLOSED = -0.010  # m (lower limit)
 
 # Named arm poses from turtlebot3_lime_moveit_config/config/turtlebot3_lime.srdf (radians).
 # Upstream "home" has joint3 = 1.87, just beyond the URDF limit 1.8567 - MoveIt refuses to plan from a start
-# state outside the limits, so this project uses 1.85 (also patched in the vendored SRDF).
-ARM_HOME = [0.0, -1.10, 1.85, 0.0, 0.98, 0.0]
+# state outside the limits. This project uses 1.80 (also patched in the vendored SRDF): with 1.85 the arm,
+# sagging a few milliradians under gravity, still ended up on the limit after driving.
+ARM_HOME = [0.0, -1.10, 1.80, 0.0, 0.98, 0.0]
 ARM_ZERO = [0.0] * 6
 
 # --- Prim paths inside the robot asset -------------------------------------------------------------

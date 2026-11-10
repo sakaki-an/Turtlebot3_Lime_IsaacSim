@@ -1,7 +1,7 @@
 """Tutorial 13: everything at once - MoveIt 2 + ros2_control, Nav2, YOLO and RViz.
 
     ros2 launch lime_isaac_bringup lime_full.launch.py
-    ros2 run lime_isaac_bringup mission          # the demo mission (Nav2 + YOLO + MoveIt)
+    ros2 run lime_isaac_bringup mission          # the pick-and-place mission (YOLO + MoveIt + Nav2)
 
 Only ONE robot_state_publisher runs (the one in lime_isaac_moveit/moveit.launch.py, whose URDF also
 contains the ros2_control block). /joint_states comes from joint_state_broadcaster.
@@ -35,8 +35,12 @@ def generate_launch_description():
                     "autostart": "true",
                 }.items(),
             ),
-            # YOLO
-            IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare("lime_yolo"), "launch", "yolo.launch.py"])),
+            # YOLO - the medium model: from the low camera the nano model (tutorial 10) calls the banana a "frisbee"
+            DeclareLaunchArgument("yolo_model", default_value="yolo11m.pt"),
+            IncludeLaunchDescription(
+                PathJoinSubstitution([FindPackageShare("lime_yolo"), "launch", "yolo.launch.py"]),
+                launch_arguments={"model": LaunchConfiguration("yolo_model")}.items(),
+            ),
             Node(
                 package="rviz2",
                 executable="rviz2",

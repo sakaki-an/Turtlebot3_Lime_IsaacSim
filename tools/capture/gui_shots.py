@@ -491,6 +491,51 @@ async def shot_11_occupancy_map():
     await frames(10)
 
 
+async def property_add(menu_path):
+    """Click the Property panel's "+ Add" button and pick `menu_path` from its menu (e.g. "Physics/Mass")."""
+    buttons = [w for w in ui_test.find_all("Property//Frame/**/Button[*]") if "Add" in (w.widget.text or "")]
+    if not buttons:
+        raise RuntimeError("no '+ Add' button in the Property panel")
+    await buttons[0].click()
+    await frames(20)
+    await ui_test.select_context_menu(menu_path)
+    await frames(30)
+
+
+async def shot_13_pick_physics():
+    """Tutorial 13 GUI steps: physics for the banana and the bowl through the Property panel's + Add menu."""
+    from pxr import Usd, UsdGeom, UsdPhysics
+
+    await lime_room_scene(with_robot=False)
+    stage = stage_utils.get_current_stage()
+    banana, bowl = "/World/LimeRoom/Objects/Banana", "/World/LimeRoom/Objects/Bowl"
+    ViewportManager.set_camera_view("/OmniverseKit_Persp", eye=(1.35, -0.75, 0.5), target=(0.85, 0.0, 0.03))
+    select(banana)
+    await frames(60)
+    await property_add("Physics/Rigid Body with Colliders Preset")
+    await property_add("Physics/Mass")
+    meshes = [p for p in Usd.PrimRange(stage.GetPrimAtPath(banana)) if p.IsA(UsdGeom.Mesh)]
+    approx = [UsdPhysics.MeshCollisionAPI(p).GetApproximationAttr().Get() for p in meshes]
+    print(f"[gui] banana: rigid body {stage.GetPrimAtPath(banana).HasAPI(UsdPhysics.RigidBodyAPI)}, "
+          f"mass API {stage.GetPrimAtPath(banana).HasAPI(UsdPhysics.MassAPI)}, mesh colliders {approx}", flush=True)
+    select(str(meshes[0].GetPath()))
+    await frames(60)
+    await scroll_property_to("Collider")
+    await shot("13_banana_collider")
+    select(bowl)
+    await frames(60)
+    await property_add("Physics/Colliders Preset")
+    bowl_meshes = [p for p in Usd.PrimRange(stage.GetPrimAtPath(bowl)) if p.IsA(UsdGeom.Mesh)]
+    print(f"[gui] bowl: rigid body {stage.GetPrimAtPath(bowl).HasAPI(UsdPhysics.RigidBodyAPI)}, mesh colliders "
+          f"{[UsdPhysics.MeshCollisionAPI(p).GetApproximationAttr().Get() for p in bowl_meshes]}", flush=True)
+    before = {str(p.GetPath()) for p in stage.Traverse()}
+    await ui_test.menu_click("Create/Physics/Physics Material")
+    await frames(60)
+    new = [str(p.GetPath()) for p in stage.Traverse() if str(p.GetPath()) not in before]
+    print(f"[gui] Create > Physics > Physics Material: new prims {new[:5]}", flush=True)
+    await shot("13_physics_material")
+
+
 SHOTS = [
     ("00_labels", dump_labels),
     ("00_node_names", print_node_ui_names),
@@ -507,6 +552,7 @@ SHOTS = [
     ("09_lidar_viewport", shot_09_lidar_viewport),
     ("11_occupancy_map", shot_11_occupancy_map),
     ("12_joint_command_graph", shot_12_joint_command_graph),
+    ("13_pick_physics", shot_13_pick_physics),
 ]
 
 
