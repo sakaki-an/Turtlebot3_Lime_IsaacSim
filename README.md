@@ -17,10 +17,14 @@ git clone https://github.com/sakaki-an/Turtlebot3_Lime_IsaacSim.git
 cd Turtlebot3_Lime_IsaacSim
 
 ./scripts/setup_isaacsim.sh          # Isaac Sim 6.2 (pip) into .venv/  (~24 GB)
-source scripts/isaac_env.sh          # every terminal that runs Isaac Sim
-python isaac/00_check_setup.py --headless &
+./docker/run_ros.sh true             # build + start the ROS 2 Jazzy container (first time ~15 min)
 
-./docker/run_ros.sh ros2 topic echo /clock --once    # builds + starts the ROS 2 Jazzy container
+# terminal 1
+source scripts/isaac_env.sh          # every terminal that runs Isaac Sim
+python isaac/00_check_setup.py --headless       # publishes /clock for 60 s
+
+# terminal 2
+./docker/run_ros.sh ros2 topic echo /clock --once
 ```
 
 Then follow the [tutorials](https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim/).

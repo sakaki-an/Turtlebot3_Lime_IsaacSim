@@ -55,8 +55,8 @@ The script:
 3. installs `imageio-ffmpeg`, which the tutorials use to save videos;
 4. adds a small fix for the GUI app (see [Troubleshooting](../reference/troubleshooting.md#core-extensions-fail-to-load-charset_normalizer)).
 
-??? note "Prefer the official zip / workstation install?"
-    That works too. Wherever these tutorials say `python isaac/xx.py`, use `~/isaacsim/python.sh isaac/xx.py`.
+??? note "Prefer the official zip / workstation install? (not tested here)"
+    It should work, but these tutorials were verified only with the pip install. Wherever these tutorials say `python isaac/xx.py`, use `~/isaacsim/python.sh isaac/xx.py`.
     `isaac-sim.sh` sets up the bundled ROS 2 libraries by itself, so you can skip `scripts/isaac_env.sh`.
     You still need the `DDS` variables from that file (`ROS_DOMAIN_ID`, `RMW_IMPLEMENTATION`, Fast DDS profile).
 
@@ -106,8 +106,8 @@ inside the container with ROS 2 sourced. Later calls reuse the running container
     UBUNTU_MIRROR=http://ftp.udx.icscoe.jp/Linux/ubuntu/ ./docker/run_ros.sh
     ```
 
-??? note "Want ROS 2 natively instead of Docker?"
-    On Ubuntu 24.04 install the same packages the Dockerfile installs:
+??? note "Want ROS 2 natively instead of Docker? (not tested here)"
+    These tutorials were verified only with the container. On Ubuntu 24.04 you can install the same packages the Dockerfile installs:
     `sudo apt install ros-jazzy-desktop ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox ros-jazzy-moveit ros-jazzy-ros2-control ros-jazzy-ros2-controllers ros-jazzy-gripper-controllers ros-jazzy-joint-state-topic-hardware-interface ros-jazzy-xacro ros-jazzy-realsense2-description ros-jazzy-vision-msgs ros-jazzy-cv-bridge ros-jazzy-teleop-twist-keyboard`.
     Then use the same `ROS_DOMAIN_ID`, `RMW_IMPLEMENTATION` and Fast DDS profile as `scripts/isaac_env.sh`.
     Never source `/opt/ros/jazzy` in the terminal that runs Isaac Sim.

@@ -4,8 +4,6 @@
         string creator = "URDF USD Converter v0.3.2"
     }
     defaultPrim = "turtlebot3_lime"
-    doc = """Generated from Composed Stage of root layer /home/an/Workspace/Turtlebot3_Lime_IsaacSim/assets/usd/turtlebot3_lime/.asset-transformer-hc0je6h8/payloads/base.usd
-"""
     endTimeCode = 1000000
     kilogramsPerUnit = 1
     metersPerUnit = 1

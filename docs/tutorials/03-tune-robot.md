@@ -39,20 +39,28 @@ but left stiffness and damping at 0, which is why everything was limp in tutoria
 ### Friction and *combine modes*
 
 Where two colliders touch, PhysX **combines** their friction coefficients. The default is the **average**.
-Our casters are meant to slide (friction 0), but on a floor with friction 0.5 the average gives
-**0.25**. The two caster pads carry the heavy battery, so that was enough to brake the robot to half
-speed. Setting the caster material's combine mode to **min** makes its 0.0 win.
+Our casters are meant to slide, so they get friction 0. The floor (a ground plane with no physics
+material of its own) uses PhysX's default material, which has friction > 0. The average of the two is
+**not** 0. The caster pads carry the heavy battery at the back, and that friction brakes the robot.
+Setting the caster material's combine mode to **min** makes its 0.0 win.
 
-| Measurement (5 rad/s for 3 s) | Distance | Wheel speed |
-|---|---|---|
-| caster friction 0, combine *average* | 0.47 m | ≈ 2.3 rad/s, jittery |
-| caster friction 0, combine **min** | **0.87 m** | **5.0 rad/s** |
+Measured with the script (both wheels at 5 rad/s for 3 s, ideal distance 0.90 m):
+
+| Caster material | Floor | Distance | Wheel speed |
+|---|---|---|---|
+| friction 0, combine *average* | default material | 0.68 m | 2.5 / 3.2 rad/s (and it curves) |
+| friction 0, combine *average* | friction set to 0 | 0.87 m | 5.0 rad/s |
+| friction 0, combine **min** | default material | **0.87 m** | **5.0 rad/s** |
+
+The second row confirms the cause: removing friction at the caster–floor contact fixes the problem.
+The third row fixes it without touching the floor.
 
 ### Solver iterations
 
-An articulation (the robot's joint tree) is solved iteratively. With the defaults the Lime's wheels jittered.
-Raising **position iterations to 64** made them smooth. Keep **velocity iterations ≤ 4**: PhysX's TGS
-solver changed how it treats more, and it prints a warning.
+An articulation (the robot's joint tree) is solved iteratively. Raising the articulation's
+**position iterations from 32 (default) to 64** made the drive test slightly more accurate:
+0.849 m → 0.874 m in the run above. Keep **velocity iterations ≤ 4**. PhysX's TGS solver changed how it
+treats more, and it prints a warning.
 
 ## The values
 
@@ -145,7 +153,8 @@ solver changed how it treats more, and it prints a warning.
 
 !!! tip "Experiment"
     Change `ARM_DRIVE = dict(stiffness=200.0, ...)` to `stiffness=20.0` and re-run: the arm sags.
-    Set the caster combine mode back to `"average"`: the robot only covers about 0.47 m.
+    Change the caster combine mode back to `"average"`: the robot covers only about 0.68 m and the
+    distance test fails.
 
 From now on every tutorial loads **`assets/usd/turtlebot3_lime_tuned.usda`**. In Python that is
 `common.lime.add_lime()`.

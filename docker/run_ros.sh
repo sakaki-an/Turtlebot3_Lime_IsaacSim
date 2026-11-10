@@ -3,6 +3,7 @@
 #
 #   ./docker/run_ros.sh                 # interactive shell (first call starts the container)
 #   ./docker/run_ros.sh ros2 topic list # run one command inside the container
+#   ./docker/run_ros.sh bash -c 'a && b' # shell syntax
 #
 # The container uses the host network, so ROS 2 nodes inside it see Isaac Sim running on the host.
 set -euo pipefail
@@ -39,7 +40,9 @@ fi
 if [ $# -eq 0 ]; then
   exec docker exec -it -e DISPLAY="${DISPLAY:-}" "$NAME" /entrypoint.sh bash
 else
-  # Non-interactive: run the command in a sourced ROS environment.
+  # Run one command in a sourced ROS environment. Arguments are passed through unchanged, so
+  # quoting works as usual:  ./docker/run_ros.sh ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{...}"
+  # For shell syntax (pipes, ;, &&) wrap it:  ./docker/run_ros.sh bash -c 'cmd1 && cmd2'
   TTY_FLAG=""; [ -t 0 ] && TTY_FLAG="-it"
-  exec docker exec $TTY_FLAG -e DISPLAY="${DISPLAY:-}" "$NAME" /entrypoint.sh bash -lc "$*"
+  exec docker exec $TTY_FLAG -e DISPLAY="${DISPLAY:-}" "$NAME" /entrypoint.sh "$@"
 fi

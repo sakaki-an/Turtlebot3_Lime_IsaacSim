@@ -58,7 +58,7 @@ flowchart LR
 
     1. Open a stage with the tuned robot: **File ▸ Open** `assets/usd/turtlebot3_lime_tuned.usda` and add a
        ground plane. Or add it as a reference to your own scene.
-    2. **Window ▸ Graph Editors ▸ Action Graph**, then **New Action Graph**.
+    2. **Window ▸ Visual Scripting ▸ Action Graph**, then **New Action Graph**.
     3. Search for each node by name in the node library (left side) and drag it into the graph:
        `On Playback Tick`, `Isaac Read Simulation Time`, `ROS2 Publish Clock`, `ROS2 Subscribe Twist`,
        2× `Break 3-Vector`, `Differential Controller`, `Articulation Controller`.

@@ -52,10 +52,10 @@ Select `physx` (Property ▸ Variants), or pass `variants=[("Physics", "physx")]
 The experimental `XformPrim` API wants a standard transform stack before it moves a prim:
 `XformPrim(path, reset_xform_op_properties=True).set_world_poses(...)`.
 
-### The robot drives at half speed / wheels jitter
+### The robot drives slowly or curves although both wheels get the same command
 
-Use the tuned asset and see [03 · Tune the robot](../tutorials/03-tune-robot.md): caster friction
-combine mode `min`, and 64 position solver iterations.
+The casters drag on the floor. Use the tuned asset and see [03 · Tune the robot](../tutorials/03-tune-robot.md):
+set the caster material's friction combine mode to `min`.
 
 ## ROS 2
 

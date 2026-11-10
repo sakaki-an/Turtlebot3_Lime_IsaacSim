@@ -110,8 +110,8 @@ def physics_material(path: str, friction: float, combine_mode: str = "average") 
     api.CreateDynamicFrictionAttr(friction)
     api.CreateRestitutionAttr(0.0)
     # When two materials touch, PhysX COMBINES their friction - by default it takes the AVERAGE.
-    # A 0.0-friction caster on a 0.5-friction floor would still get 0.25 and drag the robot.
-    # "min" makes the caster's 0.0 win.
+    # A 0.0-friction caster on a floor with friction > 0 still gets friction > 0 and brakes the robot
+    # (measured: 0.68 m instead of 0.87 m in the drive test below). "min" makes the caster's 0.0 win.
     PhysxSchema.PhysxMaterialAPI.Apply(mat.GetPrim()).CreateFrictionCombineModeAttr(combine_mode)
     return mat
 
@@ -129,7 +129,7 @@ for link, shape, mat in [
     UsdShade.MaterialBindingAPI.Apply(collider).Bind(mat, UsdShade.Tokens.weakerThanDescendants, "physics")
 
 # 4. Articulation solver ---------------------------------------------------------------------------------
-# More solver iterations = more accurate joints + contacts. The defaults make the wheels jitter.
+# More solver iterations = more accurate joints + contacts (default: 32 position iterations).
 articulation = PhysxSchema.PhysxArticulationAPI.Apply(stage.GetPrimAtPath(f"/turtlebot3_lime/{lime.ARTICULATION_ROOT}"))
 articulation.CreateSolverPositionIterationCountAttr(SOLVER_ITERATIONS[0])
 articulation.CreateSolverVelocityIterationCountAttr(SOLVER_ITERATIONS[1])

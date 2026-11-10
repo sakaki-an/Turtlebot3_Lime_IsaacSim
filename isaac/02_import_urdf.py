@@ -57,6 +57,15 @@ config = URDFImporterConfig(
 usd_path = URDFImporter(config).import_urdf()
 print(f"[02] URDF imported -> {usd_path}")
 
+# Housekeeping: the importer records the absolute path of its temporary files in a comment
+# ("doc") of payloads/base.usda. Clear it so the asset does not depend on (or reveal) this machine.
+from pxr import Sdf
+
+base_layer = Sdf.Layer.FindOrOpen(str(out_dir / "payloads" / "base.usda"))
+if base_layer is not None and base_layer.documentation:
+    base_layer.documentation = ""
+    base_layer.Save()
+
 # --- 3. Build a small scene and add the robot -----------------------------------------------------
 stage = stage_utils.create_new_stage(template="sunlight")
 UsdLux.DomeLight.Define(stage, "/World/DomeLight").GetIntensityAttr().Set(500.0)
