@@ -15,12 +15,16 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
   <exec_depend>nav2_simple_commander</exec_depend>
   <exec_depend>lime_isaac_moveit</exec_depend>
   <exec_depend>lime_yolo</exec_depend>
   <exec_depend>moveit_msgs</exec_depend>
   <exec_depend>control_msgs</exec_depend>
   <exec_depend>vision_msgs</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

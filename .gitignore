@@ -18,3 +18,5 @@ _out*/
 *.engine
 # Upstream clone used only to generate the URDF
 .upstream/
+# Maps you save yourself (tutorial 14)
+my_maps/

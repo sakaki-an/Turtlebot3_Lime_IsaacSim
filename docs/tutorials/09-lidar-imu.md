@@ -132,6 +132,10 @@ x = −2.0 m (from the LiDAR at x = 0.027 m that is 2.03 m), and the front wall 
 [09][test] PASS
 ```
 
+!!! note "−1 means “no return”"
+    Isaac Sim writes −1.0 for a beam that hits nothing within range. ROS's convention is `inf`. AMCL and the Nav2
+    costmaps (tutorial 11) work with the −1, but slam_toolbox doesn't: tutorial 14 converts it.
+
 !!! note "The LiDAR is noisy, like a real one"
     Single beams scatter by a few centimetres (the sensor model's range accuracy is 3 cm). Around 180° one run
     read 1.97–2.10 m. The check therefore uses the **median of the beams within ±3°**, the same way you would

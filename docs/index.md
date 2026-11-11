@@ -65,6 +65,7 @@ Each tutorial has two ways to do the same thing:
 | 11 | [Navigation with Nav2](tutorials/11-nav2.md) | occupancy map from the scene, Jazzy Nav2 parameters for the Lime, AMCL, goals |
 | 12 | [Arm control with MoveIt 2](tutorials/12-moveit2.md) | ros2_control over topics, MoveIt 2 on Jazzy, planning from RViz and Python |
 | 13 | [Putting it all together: pick and place](tutorials/13-all-together.md) | everything at once: YOLO + depth find the banana, MoveIt 2 picks it up and puts it into the bowl, Nav2 parks |
+| 14 | [Make your own map with SLAM](tutorials/14-slam.md) | slam_toolbox maps the room from the LiDAR; Isaac Sim's −1 "no return"; grade the map against the truth |
 
 Every tutorial was run on Isaac Sim 6.2 and checked with its `--test` mode (`tools/run_all_checks.sh`).
 

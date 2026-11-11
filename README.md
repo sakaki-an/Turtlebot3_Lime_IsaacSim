@@ -52,6 +52,7 @@ Then follow the [tutorials](https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim
 | 11 | Navigation with Nav2 (map from the scene, AMCL, goals) | `isaac/11_make_map.py`, `isaac/11_nav2.py` + `ros2 launch lime_isaac_bringup navigation.launch.py` |
 | 12 | Arm control with MoveIt 2 (ros2_control over topics) | `isaac/12_moveit.py` + `ros2 launch lime_isaac_moveit moveit.launch.py` |
 | 13 | Putting it all together: pick and place (YOLO + depth, MoveIt 2, Nav2) | `isaac/13_all_together.py` + `ros2 launch lime_isaac_bringup lime_full.launch.py` |
+| 14 | Make your own map with SLAM (slam_toolbox) | `isaac/14_slam.py` + `ros2 launch lime_isaac_bringup slam.launch.py` |
 
 Every script accepts `--headless`, `--test` (automatic check, prints `PASS`/`FAIL`) and `--record NAME`
 (saves the media used on the website). `tools/run_all_checks.sh` runs every check.

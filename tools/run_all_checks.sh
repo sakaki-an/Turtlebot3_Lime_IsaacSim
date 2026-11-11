@@ -40,8 +40,9 @@ check() {
 }
 
 # Check that needs ROS 2 traffic: start Isaac Sim, wait for "[NN] ready", run a command in the container.
+# The optional 6th argument is the script's own NN, when the check id differs from it.
 check_with_ros() {
-  local id=$1 script=$2 media=$3 ros_cmd=$4 timeout_s=${5:-600}
+  local id=$1 script=$2 media=$3 ros_cmd=$4 timeout_s=${5:-600} tag=${6:-$1}
   want "$id" || return 0
   tools/stop_isaac.sh >/dev/null; docker/ros_clean.sh >/dev/null  # one simulation, no leftover nodes
   local log="$LOG_DIR/$id.log"
@@ -49,12 +50,12 @@ check_with_ros() {
   # shellcheck disable=SC2046
   ( timeout "$timeout_s" python "$script" --headless --test $(record_flag "$media") >"$log" 2>&1 ) &
   local pid=$!
-  for _ in $(seq 1 150); do grep -q "^\[$id\] ready" "$log" 2>/dev/null && break; sleep 2; done
+  for _ in $(seq 1 150); do grep -q "^\[$tag\] ready" "$log" 2>/dev/null && break; sleep 2; done
   "$ROS" bash -c "$ros_cmd" >"$LOG_DIR/$id.ros.log" 2>&1
   wait $pid
   docker/ros_clean.sh >/dev/null
-  if grep -q "^\[$id\]\[test\].*PASS" "$log"; then RESULT[$id]=PASS; else RESULT[$id]=FAIL; fi
-  grep "^\[$id\]" "$log" | tail -4 | sed 's/^/    /'
+  if grep -q "^\[$tag\]\[test\].*PASS" "$log"; then RESULT[$id]=PASS; else RESULT[$id]=FAIL; fi
+  grep "^\[$tag\]" "$log" | tail -4 | sed 's/^/    /'
 }
 
 "$ROS" true >/dev/null  # make sure the ROS container is running
@@ -106,6 +107,18 @@ check_with_ros 13 isaac/13_all_together.py tutorial13_all_together \
   'ros2 launch lime_isaac_bringup lime_full.launch.py rviz:=false > /tmp/lime_home/full.log 2>&1 &
    for i in $(seq 1 150); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/full.log && grep -a -q "You can start planning now" /tmp/lime_home/full.log && break; sleep 1; done; sleep 5
    timeout 400 ros2 run lime_isaac_bringup mission' 900
+
+# 14: slam_toolbox maps the room while the script drives a tour; the map is saved for 14nav.
+check_with_ros 14 isaac/14_slam.py tutorial14_slam \
+  'ros2 launch lime_isaac_bringup slam.launch.py rviz:=false > /tmp/lime_home/slam.log 2>&1 &
+   for i in $(seq 1 400); do grep -q "^\[14\] route done" /lime/_out/checks/14.log && break; sleep 1; done
+   mkdir -p /lime/_out/slam && rm -f /lime/_out/slam/lime_room_slam.* && timeout 30 ros2 run nav2_map_server map_saver_cli -f /lime/_out/slam/lime_room_slam --ros-args -p use_sim_time:=true' 700
+
+# 14nav: tutorial 11's Nav2 goal again, but on the map that SLAM just made (11_nav2.py prints [11] lines).
+check_with_ros 14nav isaac/11_nav2.py "" \
+  'ros2 launch lime_isaac_bringup navigation.launch.py rviz:=false map:=/lime/_out/slam/lime_room_slam.yaml > /tmp/lime_home/nav2.log 2>&1 &
+   for i in $(seq 1 90); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/nav2.log && break; sleep 1; done; sleep 5
+   timeout 200 ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 3.2, y: -1.8}, orientation: {w: 1.0}}}}"' 600 11
 
 echo
 echo "=== Summary ==="

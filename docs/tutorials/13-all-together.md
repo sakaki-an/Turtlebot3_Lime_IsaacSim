@@ -350,4 +350,6 @@ The banana lands about 4 cm from the bowl's centre, short of it, because the str
     --8<-- "ros2_ws/src/lime_isaac_bringup/scripts/mission.py"
     ```
 
+**Next:** [14 · Make your own map with SLAM](14-slam.md)
+
 Happy simulating! 🍋

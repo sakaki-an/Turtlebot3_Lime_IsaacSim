@@ -75,3 +75,10 @@ and `security.ubuntu.com`.
 
 `run_ros.sh` passes your `DISPLAY` and runs `xhost +local:docker`. Start it from a desktop terminal,
 or set `DISPLAY` (for example `DISPLAY=:0` or your VNC display) before calling it.
+
+### The SLAM map drifts or twists although odometry is exact
+
+Isaac Sim's RTX LiDAR writes **−1.0** for beams that hit nothing; ROS expects `inf`. slam_toolbox's scan matcher
+turns each −1 into a phantom point 1 m away and drifts, by more than a metre when it adds scans often (small
+`minimum_travel_*`). Feed it `/scan_fixed` from the `scan_fix` node, as `slam.launch.py` does, and keep the
+default `minimum_travel_*` ([tutorial 14](../tutorials/14-slam.md)).
