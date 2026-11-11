@@ -7,8 +7,8 @@ Writes ros2_ws/src/lime_isaac_bringup/maps/lime_room.pgm + lime_room.yaml (the R
 
 The generator (extension isaacsim.asset.gen.omap) checks, cell by cell, whether a physics collider occupies a
 height band of the scene, and flattens the band into one 2D map. We map everything from 1 cm to 50 cm above the
-floor: the walls and obstacles the LiDAR sees (its scan plane is 16 cm high), AND the low objects on the floor
-that it cannot see - the banana, the mug and the bowl. Nav2 must avoid them too.
+floor. A map is for what stays put: the walls, the pillar, the crate and the divider. The floor is cleared first
+(no objects); things that come and go, like the traffic cone of 11_nav2.py, are the costmaps' job.
 """
 
 import sys
@@ -28,11 +28,11 @@ import isaacsim.core.experimental.utils.app as app_utils
 import isaacsim.core.experimental.utils.stage as stage_utils
 import numpy as np
 from common.paths import IMG_DIR, REPO_ROOT
-from common.scene import OBJECTS, ROOM_X, ROOM_Y, WALL_THICKNESS, build_lime_room
+from common.scene import CONE_XY, ROOM_X, ROOM_Y, WALL_THICKNESS, build_lime_room
 from isaacsim.core.simulation_manager import SimulationManager
 
 RESOLUTION = 0.05  # m per cell (the usual value for small indoor robots)
-BAND = (0.01, 0.50)  # m above the floor: from just above the floor (not the floor itself) to above the objects
+BAND = (0.01, 0.50)  # m above the floor: from just above the floor (not the floor itself) to above the obstacles
 MAP_DIR = REPO_ROOT / "ros2_ws" / "src" / "lime_isaac_bringup" / "maps"
 if args.out:
     MAP_DIR = REPO_ROOT / args.out
@@ -44,7 +44,7 @@ import omni.usd
 from isaacsim.asset.gen.omap.bindings import _omap
 
 stage = stage_utils.create_new_stage(template="empty")
-build_lime_room(stage, object_physics=True)  # the room and the objects' colliders - no robot (not in its own map)
+build_lime_room(stage, with_objects=False)  # only what stays put - no objects, no robot (not in its own map)
 while stage_utils.is_stage_loading():
     simulation_app.update()
 
@@ -111,10 +111,8 @@ if args.test or args.record:
         "pillar (2.0, -1.2) occupied": cell(2.0, -1.2) == 0,
         "robot start (0, 0) free": cell(0.0, 0.0) == 254,
         "room centre (1.0, -0.5) free": cell(1.0, -0.5) == 254,
-        "between the start and the objects (0.4, -0.1) free": cell(0.4, -0.1) == 254,
+        f"where the cone will stand {CONE_XY} free (not in the map)": cell(*CONE_XY) == 254,
     }
-    for name, _asset, x, y, *_rest in OBJECTS:  # the low objects the LiDAR cannot see must be in the map
-        checks[f"{name.lower()} ({x}, {y}) occupied"] = cell(x, y) == 0
     for text, passed in checks.items():
         print(f"[11][check] {'ok  ' if passed else 'FAIL'} {text}")
     ok = all(checks.values())

@@ -37,7 +37,7 @@ import isaacsim.core.experimental.utils.app as app_utils
 import isaacsim.core.experimental.utils.stage as stage_utils
 import numpy as np
 from common import graphs, lime, sensors
-from common.scene import OBJECTS, OBSTACLES, ROOM_X, ROOM_Y, build_lime_room
+from common.scene import OBSTACLES, ROOM_X, ROOM_Y, build_lime_room
 from isaacsim.core.experimental.prims import Articulation
 from isaacsim.core.simulation_manager import SimulationManager
 
@@ -144,19 +144,8 @@ def cell_grid(mask, ox, oy, res):
     return ox + (cols + 0.5) * res, oy + (rows + 0.5) * res
 
 
-def without_objects(truth, radius=0.15):
-    """Isaac Sim's map (tutorial 11) also has the four objects on the floor. This room was mapped without
-    them, so erase them from the truth too."""
-    occ, ox, oy, res, free = truth
-    x, y = cell_grid(occ, ox, oy, res)
-    near = np.zeros_like(occ)
-    for _name, _asset, cx, cy, *_ in OBJECTS:
-        near |= np.hypot(x - cx, y - cy) < radius
-    return occ & ~near, ox, oy, res, free | near
-
-
 def compare_maps(slam, truth, tolerance=0.10):
-    """How well does the SLAM map match Isaac Sim's map (tutorial 11, without the objects)?
+    """How well does the SLAM map match Isaac Sim's map (tutorial 11)?
     precision: SLAM wall cells that are on a real wall (within tolerance)
     recall:    real wall faces (occupied cells next to the room's free space) that SLAM found (within tolerance)"""
     s_occ, s_ox, s_oy, res = slam
@@ -303,7 +292,7 @@ ok = True
 if args.test:
     from common.paths import IMG_DIR, REPO_ROOT
 
-    truth = without_objects(occupancy_from_pgm(REPO_ROOT / "ros2_ws" / "src" / "lime_isaac_bringup" / "maps" / "lime_room.yaml"))
+    truth = occupancy_from_pgm(REPO_ROOT / "ros2_ws" / "src" / "lime_isaac_bringup" / "maps" / "lime_room.yaml")
     m = latest["map"]
     checks = {"slam_toolbox published /map": m is not None, "the tour was driven to the end": done_at is not None}
     if m is not None:

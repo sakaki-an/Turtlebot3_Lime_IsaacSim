@@ -62,7 +62,7 @@ Each tutorial has two ways to do the same thing:
 | 08 | [Camera (RealSense D435)](tutorials/08-camera.md) | RGB, depth, camera_info; optical frames; the lime_room scene |
 | 09 | [LiDAR & IMU](tutorials/09-lidar-imu.md) | RTX LiDAR configured as the LDS-01, `/scan`, IMU, `/imu`, sensors in RViz |
 | 10 | [Object detection with YOLO](tutorials/10-yolo.md) | a ROS 2 YOLO node on simulated images, `vision_msgs/Detection2DArray` |
-| 11 | [Navigation with Nav2](tutorials/11-nav2.md) | occupancy map from the scene, Jazzy Nav2 parameters for the Lime, AMCL, goals |
+| 11 | [Navigation with Nav2](tutorials/11-nav2.md) | occupancy map from the scene, Jazzy Nav2 parameters for the Lime, AMCL, goals, a traffic cone that is not in the map |
 | 12 | [Arm control with MoveIt 2](tutorials/12-moveit2.md) | ros2_control over topics, MoveIt 2 on Jazzy, planning from RViz and Python |
 | 13 | [Putting it all together: pick and place](tutorials/13-all-together.md) | everything at once: YOLO + depth find the banana, MoveIt 2 picks it up and puts it into the bowl, Nav2 parks |
 | 14 | [Make your own map with SLAM](tutorials/14-slam.md) | slam_toolbox maps the room from the LiDAR; Isaac Sim's −1 "no return"; grade the map against the truth |

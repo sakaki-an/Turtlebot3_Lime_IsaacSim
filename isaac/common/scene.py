@@ -10,7 +10,9 @@ The walls and obstacles are simple boxes: they are easy to see for the LiDAR, ha
 physics, and give a clean occupancy map for Nav2 (tutorial 11).
 
     build_lime_room(stage)          # adds /World/LimeRoom to the current stage
-    build_lime_room(stage, object_physics=True)   # ... with real objects: colliders and mass (tutorials 11, 13)
+    build_lime_room(stage, object_physics=True)   # ... with real objects: colliders and mass (tutorial 13)
+    build_lime_room(stage, with_objects=False)    # ... with the floor cleared (tutorials 11 and 14)
+    add_traffic_cone(stage)         # tutorial 11: an obstacle that is not in the map
     python isaac/common/scene.py    # (re)writes assets/scenes/lime_room.usda for the GUI tutorials
 """
 
@@ -36,6 +38,10 @@ OBJECTS = [
     ("Bowl", YCB + "024_bowl.usd", 1.00, 0.40, 0.0, 0.028, -1, "bowl"),
     ("Bottle", YCB + "006_mustard_bottle.usd", 0.95, -0.38, 30.0, 0.096, -1, "bottle"),
 ]
+
+# Tutorial 11: a traffic cone from NVIDIA's warehouse props (46 cm tall, 34 cm base), on Nav2's way to its goal
+CONE_ASSET = "/Isaac/Environments/Simple_Warehouse/Props/S_TrafficCone.usd"
+CONE_XY = (1.2, -0.3)
 
 
 def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = True, object_physics: bool = False):
@@ -87,9 +93,32 @@ def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = T
     return root
 
 
+# --8<-- [start:add_traffic_cone]
+def add_traffic_cone(stage, x: float = CONE_XY[0], y: float = CONE_XY[1], root: str = "/World/LimeRoom") -> str:
+    """Tutorial 11: put a traffic cone on the floor AFTER the map was made, so it is not in the map.
+    It is a rigid body (1 kg): if the robot touches it, it moves. The asset already has a mesh collider."""
+    from isaacsim.core.experimental.prims import XformPrim
+    from isaacsim.storage.native import get_assets_root_path
+    from pxr import Usd, UsdGeom, UsdPhysics
+
+    import isaacsim.core.experimental.utils.stage as stage_utils
+
+    path = f"{root}/Cone"
+    stage_utils.add_reference_to_stage(get_assets_root_path() + CONE_ASSET, path)
+    XformPrim(path, reset_xform_op_properties=True).set_world_poses(positions=[[x, y, 0.002]])
+    prim = stage.GetPrimAtPath(path)
+    UsdPhysics.RigidBodyAPI.Apply(prim)
+    UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(1.0)  # kg
+    for p in Usd.PrimRange(prim):
+        if p.IsA(UsdGeom.Mesh):  # a moving body needs a convex collider (a cone is convex anyway)
+            UsdPhysics.MeshCollisionAPI.Apply(p).CreateApproximationAttr("convexHull")
+    return path
+# --8<-- [end:add_traffic_cone]
+
+
 # --8<-- [start:add_object_physics]
 def add_object_physics(stage, root: str = "/World/LimeRoom"):
-    """Make the objects real: colliders and mass, so the robot cannot drive through them (tutorials 11, 13).
+    """Make the objects real: colliders and mass, so the robot cannot drive through them (tutorial 13).
 
     Without this (tutorials 08-10) they are only pictures for the camera. With it:
       * banana, mug, bottle: rigid bodies with their real (YCB) masses: they fall, can be pushed, knocked over

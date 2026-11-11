@@ -35,7 +35,7 @@ from isaacsim.core.simulation_manager import SimulationManager
 graphs.enable_ros2_realtime(simulation_app)
 
 stage = stage_utils.create_new_stage(template="empty")
-build_lime_room(stage, object_physics=True)  # real objects: colliders and mass (tutorial 11)
+build_lime_room(stage, object_physics=True)  # real objects: colliders and mass, so they can be picked up
 while stage_utils.is_stage_loading():
     simulation_app.update()
 robot_path = "/World/turtlebot3_lime"

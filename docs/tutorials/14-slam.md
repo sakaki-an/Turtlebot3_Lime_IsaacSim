@@ -164,21 +164,20 @@ map, so Nav2 can use it.
 
 ## Part 4: compare with Isaac Sim's map
 
-In simulation you know the truth, so you can grade the SLAM map. Grey is Isaac Sim's map from tutorial 11 without
-the four objects (they weren't on the floor), red is what slam_toolbox found, and blue is the robot's path:
+In simulation you know the truth, so you can grade the SLAM map. Grey is Isaac Sim's map from tutorial 11, red
+is what slam_toolbox found, and blue is the robot's path:
 
 ![SLAM map (red) on top of Isaac Sim's map (grey)](../assets/img/tutorial14_compare.png){ width="520" }
 
-*99.7 % of the SLAM wall cells lie on a real wall (within 10 cm), and SLAM found every wall face that the LiDAR can
+*99.5 % of the SLAM wall cells lie on a real wall (within 10 cm), and SLAM found every wall face that the LiDAR can
 see from inside the room. The walls, the pillar, the crate and the divider are all there.*
 
 !!! info "A SLAM map contains exactly what the LiDAR sees"
     The LiDAR scans one plane, 16 cm above the floor. SLAM maps everything that crosses it, and nothing below it.
     With the objects left on the floor, the bottle (19 cm) would be in the map like a small pillar, and the banana
-    (4 cm), the mug (8 cm) and the bowl (6 cm) would not be there at all. Tutorial 11's map is different on
-    purpose: Isaac Sim draws all four objects into it from a 1–50 cm height band, because Nav2 can't avoid the
-    low ones otherwise. That is a simulation shortcut. On a real robot you would add a depth camera to the
-    costmaps, or draw the low obstacles in yourself as keep-out zones.
+    (4 cm), the mug (8 cm) and the bowl (6 cm) would not be there at all. Neither would they be in Nav2's
+    costmaps, which get obstacles from the same LiDAR. Real robots add a depth camera to the costmaps for low
+    obstacles.
 
 ## Part 5: navigate on your map
 
@@ -189,17 +188,12 @@ python isaac/11_nav2.py                                                         
 ./docker/run_ros.sh ros2 launch lime_isaac_bringup navigation.launch.py map:=/lime/my_maps/lime_room_slam.yaml   # terminal 2
 ```
 
-Nav2 localises with AMCL on your map just as well. `11_nav2.py` puts the four objects back on the floor, and
-none of them is in your map:
-
-- **The bottle** is no problem. The LiDAR sees it, and the costmaps' obstacle layers mark it from the live scan,
-  just as they would mark a person walking by.
-- **The banana, the mug and the bowl** are lower than the LiDAR's plane. Neither your map nor the LiDAR knows
-  they are there.
+Nav2 localises with AMCL on your map just as well. `11_nav2.py` puts tutorial 11's traffic cone on the floor. It
+isn't in your map either: the LiDAR sees it, the costmaps mark it from the live scan, and the planner goes round
+it, just as on Isaac Sim's map.
 
 The check `14nav` sends tutorial 11's goal (3.2, −1.8) on the map that the SLAM check has just saved: the robot
-gets there in 27 s (3.99 m) without touching anything, 44 cm from the bottle. Its path happens to pass the banana
-at 38 cm, as on Isaac Sim's map, but a goal right behind the banana would send the robot into it.
+gets there in 26 s (3.95 m) without touching the cone.
 
 ### The Lime's slam_toolbox parameters
 
@@ -223,29 +217,28 @@ these changes:
 map, and its robot pose against the true one. `tools/run_all_checks.sh 14` starts slam_toolbox and saves the map:
 
 ```text
-[14] waypoint 1/10 (0.3, -0.9): SLAM pose error 1.4 cm, 0.2 deg
-[14] waypoint 2/10 (1.3, -1.9): SLAM pose error 3.1 cm, 0.2 deg
-[14] waypoint 3/10 (3.2, -1.8): SLAM pose error 5.1 cm, 0.2 deg
+[14] waypoint 1/10 (0.3, -0.9): SLAM pose error 2.2 cm, 0.4 deg
+[14] waypoint 2/10 (1.3, -1.9): SLAM pose error 2.8 cm, 0.0 deg
+[14] waypoint 3/10 (3.2, -1.8): SLAM pose error 5.7 cm, 0.6 deg
 ...
-[14] waypoint 5/10 (3.4, 1.9): SLAM pose error 6.2 cm, 0.8 deg
+[14] waypoint 5/10 (3.4, 1.9): SLAM pose error 9.7 cm, 1.0 deg
 ...
-[14] waypoint 10/10 (0.0, -0.4): SLAM pose error 3.2 cm, 1.4 deg
+[14] waypoint 10/10 (0.0, -0.4): SLAM pose error 5.0 cm, 1.4 deg
 [14] route done at t = 134 s: save the map now
-[14] /map: 124 x 105 cells, 1188 occupied; 200 map updates
+[14] /map: 125 x 105 cells, 1170 occupied; 200 map updates
 [14][check] ok   slam_toolbox published /map
 [14][check] ok   the tour was driven to the end
-[14][check] ok   SLAM walls lie on real walls (+-10 cm): 99.7%
+[14][check] ok   SLAM walls lie on real walls (+-10 cm): 99.5%
 [14][check] ok   real walls found by SLAM (+-10 cm): 100.0%
-[14][check] ok   Pillar at (2.0, -1.2) is in the SLAM map (67 cells)
-[14][check] ok   Crate at (2.6, 1.3) is in the SLAM map (79 cells)
-[14][check] ok   Divider at (1.2, 1.9) is in the SLAM map (97 cells)
-[14][check] ok   SLAM's robot pose at the end vs ground truth: 3.1 cm, 1.4 deg
-[14][check] ok   largest SLAM pose error at the waypoints: 6.2 cm, 1.6 deg
+[14][check] ok   Pillar at (2.0, -1.2) is in the SLAM map (70 cells)
+[14][check] ok   Crate at (2.6, 1.3) is in the SLAM map (88 cells)
+[14][check] ok   Divider at (1.2, 1.9) is in the SLAM map (72 cells)
+[14][check] ok   SLAM's robot pose at the end vs ground truth: 5.0 cm, 1.4 deg
+[14][check] ok   largest SLAM pose error at the waypoints: 9.7 cm, 2.0 deg
 [14][test] PASS
 ```
 
-Both percentages leave out the four objects (they are in Isaac Sim's map, but not in this room) and the outer side
-of the room's walls, which the LiDAR can't see from inside. A map cell is 5 cm,
+Both percentages leave out the outer side of the room's walls, which the LiDAR can't see from inside. A map cell is 5 cm,
 so the pose may be off by a cell or two. Without `scan_fix` and with scans every 0.2 m / 0.3 rad, the same tour drifted by more than 1 m.
 
 ## Troubleshooting
@@ -256,7 +249,7 @@ so the pose may be off by a cell or two. Without `scan_fix` and with scans every
 | RViz: *"Frame [map] does not exist"* | slam_toolbox publishes `map` after its first scan: is `/scan` arriving, and is the simulation playing? |
 | `map_saver_cli` times out | It needs a running slam_toolbox, and sim time (`use_sim_time:=true`). |
 | Something you moved away is still in the map | It was there when you mapped. Clear the floor and map again, or paint the spot white (free) in the `.pgm` with an image editor. |
-| Nav2 drives over the banana on your SLAM map | The LiDAR can't see it (part 4). Use Isaac Sim's map, or draw the object into your map. |
+| Nav2 drives into something low | Anything lower than the LiDAR's plane (16 cm) is in neither your map nor the costmaps (part 4). Draw it into the `.pgm` (black), or add a depth camera to the costmaps. |
 | The map is wrong after you restart Isaac Sim | Restart slam_toolbox too: simulation time went back to 0. |
 
 **Back to:** [Home](../index.md)

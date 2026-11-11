@@ -55,8 +55,8 @@ flowchart LR
 ## Objects you can pick up
 
 In tutorials 08–10 the objects on the floor are only pictures for the camera: they have no collider and no mass.
-Since [tutorial 11](11-nav2.md) they are real (`add_object_physics`): colliders and mass, so the robot cannot drive
-through them, and they would be knocked over if it drove into them. Picking one up needs two more things: a bowl
+Here they are real (`add_object_physics`): colliders and mass, so the robot cannot drive through them, and they
+would be knocked over if it drove into them. Picking one up needs two more things: a bowl
 the banana fits into, and grippy fingers.
 
 | Object | Physics | Why |
@@ -96,9 +96,9 @@ the banana fits into, and grippy fingers.
 
 === "Python (standalone)"
 
-    `13_all_together.py` builds the same scene as tutorial 11, with `object_physics=True`:
+    `13_all_together.py` builds the lime_room with `object_physics=True`:
 
-    ??? example "`add_object_physics()`: colliders and mass for every object (tutorials 11 and 13)"
+    ??? example "`add_object_physics()`: colliders and mass for every object"
         ```python
         --8<-- "isaac/common/scene.py:add_object_physics"
         ```
@@ -132,13 +132,13 @@ Terminal 3, the mission (the first start downloads `yolo11m.pt`, about 40 MB, in
 ```
 
 ```text
-YOLO: banana (0.87) at (0.75, -0.11), bowl (0.70) at (0.96, 0.41)
+YOLO: banana (0.88) at (0.75, -0.11), bowl (0.69) at (0.96, 0.41)
 YOLO: banana (0.92) at (0.792, -0.123), pointing 19 deg
 MoveIt: above the banana: done
 MoveIt: down to the banana: done
 MoveIt: lift: done
 MoveIt: carry: done
-YOLO: bowl (0.74) at (0.998, 0.377), radius 9 cm
+YOLO: bowl (0.68) at (0.998, 0.377), radius 9 cm
 MoveIt: above the bowl: done
 MoveIt: arm folded: done
 Nav2: parking at (2.8, -1.8)
@@ -291,15 +291,15 @@ goal stays active, and the next gripper command (open, above the bowl) replaces 
 
 ```text
 [13] ground truth: banana at [ 0.8   -0.121], bowl at [1.  0.4]
-[13] banana lifted (10 cm above the floor) at t = 45 s
-[13] banana in the bowl, 3.7 cm from its centre at t = 69 s
+[13] banana lifted (10 cm above the floor) at t = 46 s
+[13] banana in the bowl, 4.3 cm from its centre at t = 70 s
 [13] arm folded at t = 71 s
 [13] robot parked in the far corner at t = 95 s
 [13][check] ok   banana picked up (more than 10 cm above the floor)
 [13][check] ok   banana put into the bowl (within 7 cm of its centre)
 [13][check] ok   arm folded afterwards
 [13][check] ok   robot parked in the far corner (within 0.3 m)
-[13][check] ok   banana still in the bowl at the end (3.7 cm from its centre)
+[13][check] ok   banana still in the bowl at the end (4.3 cm from its centre)
 [13][check] ok   mug not bumped into (moved 0.0 cm)
 [13][check] ok   bottle not bumped into (moved 0.0 cm)
 [13][test] PASS

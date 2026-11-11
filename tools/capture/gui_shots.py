@@ -468,16 +468,15 @@ async def shot_09_lidar_viewport():
 
 
 async def shot_11_occupancy_map():
-    from pxr import Usd, UsdGeom, UsdPhysics
+    import omni.kit.commands
 
     await lime_room_scene(with_robot=False)
     stage = stage_utils.get_current_stage()
-    for name in ("Banana", "Mug", "Bowl", "Bottle"):  # tutorial 11 GUI step: colliders for the objects
-        select(f"/World/LimeRoom/Objects/{name}")
-        await frames(30)
-        await property_add("Physics/Colliders Preset")
-        meshes = [p for p in Usd.PrimRange(stage.GetPrimAtPath(f"/World/LimeRoom/Objects/{name}")) if p.IsA(UsdGeom.Mesh)]
-        print(f"[gui] {name}: colliders {[p.HasAPI(UsdPhysics.CollisionAPI) for p in meshes]}", flush=True)
+    select("/World/LimeRoom/Objects")  # tutorial 11 GUI step: clear the floor (Stage panel: select, Delete)
+    await frames(30)
+    omni.kit.commands.execute("DeletePrims", paths=["/World/LimeRoom/Objects"])
+    await frames(30)
+    print(f"[gui] objects deleted: {not stage.GetPrimAtPath('/World/LimeRoom/Objects').IsValid()}", flush=True)
     select()
     ViewportManager.set_camera_view("/OmniverseKit_Persp", eye=(1.0, -0.01, 9.0), target=(1.0, 0.0, 0.0))
     await ui_test.menu_click("Tools/Robotics/Occupancy Map")

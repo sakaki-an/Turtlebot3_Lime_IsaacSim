@@ -61,7 +61,7 @@ flowchart LR
         ![LiDAR hits drawn in the viewport (showDebugView)](../assets/img/gui/09_lidar_viewport.png){ .full }
 
         The dots sit on the walls, the obstacles and the bottle. The cup, bowl and banana are lower than the
-        scan plane (16 cm), so the LiDAR cannot see them. Nav2 can't either (tutorial 11).
+        scan plane (16 cm), so the LiDAR cannot see them.
 
 === "Python (standalone)"
 
