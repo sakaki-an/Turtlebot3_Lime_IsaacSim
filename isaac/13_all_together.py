@@ -10,8 +10,8 @@
 Everything from tutorials 06-12 in one scene:
     /clock  /cmd_vel  /odom  /tf  /isaac_joint_states  /isaac_joint_commands
     /camera/camera/...  /scan  /imu
-New here: the banana is a real object (rigid body, collider, mass) the gripper can pick up, and the bowl a
-container to put it in (common/scene.py: setup_pick_and_place).
+New here: the objects are real (rigid bodies, colliders, masses): the gripper can pick up the banana, the bowl
+holds it, and the mug and the bottle would be knocked over (common/scene.py: setup_pick_and_place).
 """
 
 import sys
@@ -67,6 +67,8 @@ print("[13] ready: ros2 launch lime_isaac_bringup lime_full.launch.py, then ros2
 
 # --test: follow the mission from the simulation's point of view (ground truth)
 banana = XformPrim("/World/LimeRoom/Objects/Banana")
+others = {name: XformPrim(f"/World/LimeRoom/Objects/{name}") for name in ("Mug", "Bottle")}  # must not be touched
+start = {}  # where they rest after settling (recorded 1 s into the simulation)
 BOWL = np.array(next(o for o in OBJECTS if o[0] == "Bowl")[2:4])
 CORNER = np.array([2.8, -1.8])
 events, steps, still_since, view_blend, still_frame = {}, 0, None, 0.0, -1
@@ -89,8 +91,13 @@ while simulation_app.is_running():
             recorder.look_at(*[(1 - a) * np.array(c) + a * np.array(o) for c, o in zip(CLOSE_UP, OVERVIEW)])
         recorder.capture()
     if args.test or args.record:
+        if steps == 60:
+            start = {name: prim.get_world_poses()[0].numpy()[0].copy() for name, prim in others.items()}
         xy = robot.get_world_poses()[0].numpy()[0, :2]
         q = robot.get_dof_positions(dof_indices=arm).numpy()[0]
+        for name, prim in others.items():  # report the moment the robot bumps into the mug or the bottle
+            if start and f"bumped {name}" not in events and np.linalg.norm(prim.get_world_poses()[0].numpy()[0] - start[name]) > 0.005:
+                event(f"bumped {name}", f"{name.lower()} bumped (robot at {np.round(xy, 2)})")
         b = banana.get_world_poses()[0].numpy()[0]
         if "lifted" not in events and b[2] > 0.10:
             event("lifted", f"banana lifted ({b[2] * 100:.0f} cm above the floor)")
@@ -116,6 +123,9 @@ if args.test:
         "robot parked in the far corner (within 0.3 m)": "parked" in events,
         f"banana still in the bowl at the end ({np.linalg.norm(b[:2] - BOWL) * 100:.1f} cm from its centre)": np.linalg.norm(b[:2] - BOWL) < 0.07,
     }
+    for name, prim in others.items():
+        moved = np.linalg.norm(prim.get_world_poses()[0].numpy()[0] - start[name])
+        checks[f"{name.lower()} not bumped into (moved {moved * 100:.1f} cm)"] = moved < 0.01
     for text, passed in checks.items():
         print(f"[13][check] {'ok  ' if passed else 'FAIL'} {text}")
     ok = all(checks.values())

@@ -89,11 +89,14 @@ BOWL_SCALE = 1.5  # tutorial 13: the 19 cm banana fits into a 24 cm bowl, not in
 
 
 def setup_pick_and_place(stage, robot_path: str, root: str = "/World/LimeRoom"):
-    """Tutorial 13: turn the banana into a real object the gripper can hold, and the bowl into a container.
+    """Tutorial 13: make the objects real - the banana something the gripper can hold, the bowl a container,
+    the mug and the bottle things the robot would knock over if it drove into them.
 
     In tutorials 08-12 the objects are only pictures for the camera: no collider, no mass. Here:
       * banana: rigid body (it falls, can be pushed and lifted), 66 g, a convex-decomposition collider
         (a single convex hull would make the curved banana a 7 cm wide blob, too wide for the gripper)
+      * mug, bottle: rigid bodies with their real masses; the bottle gets a convex hull, the mug a convex
+        decomposition (with a convex hull the mug crept across the floor by itself)
       * bowl:   1.5x bigger, a static collider that keeps its exact (concave) shape
       * fingers and banana: rubber-like friction 1.0, so a 10 N squeeze holds the banana
     """
@@ -112,6 +115,12 @@ def setup_pick_and_place(stage, robot_path: str, root: str = "/World/LimeRoom"):
     body = PhysxSchema.PhysxRigidBodyAPI.Apply(banana)
     body.CreateSolverPositionIterationCountAttr(32)  # an object squeezed between two fingers needs more iterations
     colliders(banana, "convexDecomposition")
+
+    for name, mass, approximation in (("Mug", 0.118, "convexDecomposition"), ("Bottle", 0.603, "convexHull")):
+        prim = stage.GetPrimAtPath(f"{root}/Objects/{name}")  # mass in kg: the YCB objects' real masses
+        UsdPhysics.RigidBodyAPI.Apply(prim)
+        UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(mass)
+        colliders(prim, approximation)
 
     bowl_path = f"{root}/Objects/Bowl"
     _name, _asset, x, y, _yaw, half_height, _up, _coco = next(o for o in OBJECTS if o[0] == "Bowl")

@@ -388,9 +388,11 @@ def main():
     lime.spin_for(1.0)
     lime.move_arm(HOME, "arm folded")
 
-    # 7. Back off and let Nav2 park the robot.
+    # 7. Back away from the bowl and drive into the open middle of the room, then let Nav2 park the robot.
+    #    (Started right next to the bottle, Nav2 would steer the robot straight through it.)
     x, y, yaw = lime.pose()
-    lime.drive_to(x - 0.25 * math.cos(yaw), y - 0.25 * math.sin(yaw), backwards=True)
+    lime.drive_to(x - 0.12 * math.cos(yaw), y - 0.12 * math.sin(yaw), backwards=True)
+    lime.drive_to(bowl[0] + 0.6, bowl[1] - 0.45)
     log.info(f"Nav2: parking at ({PARK[0]}, {PARK[1]})")
     goal = PoseStamped()
     goal.header.frame_id = "map"

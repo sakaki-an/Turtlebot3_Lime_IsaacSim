@@ -55,12 +55,14 @@ flowchart LR
 ## Objects you can pick up
 
 In tutorials 08–12 the objects on the floor are only pictures for the camera: they have no collider and no mass.
-The arm would pass straight through them. To pick something up, the object needs physics, and so does the place
-you put it.
+The arm, or the whole robot, would pass straight through them. To pick something up, the object needs physics, and
+so does the place you put it. The other objects get physics too, so they would really be knocked over if the
+robot drove into them.
 
 | Object | Physics | Why |
 |---|---|---|
 | banana | rigid body, 66 g, *convex decomposition* collider | it must fall, be pushed and be lifted. A single convex hull would turn the curved banana into a blob 7 cm wide, too wide for the gripper |
+| mug, mustard bottle | rigid bodies, 118 g and 603 g; *convex decomposition* for the mug, *convex hull* for the bottle | they would be knocked over if the robot drove into them. With the default convex hull the mug crept 16 cm across the floor by itself in 5 s; with a convex decomposition it stands still |
 | bowl | static collider, *none* (the exact triangle mesh), **1.5× bigger** | it must hold the banana in its hollow; the 19 cm banana does not fit in the original 16 cm bowl |
 | fingers + banana | physics material, friction 1.0 | rubber-like pads, so a 10 N squeeze holds the banana |
 
@@ -69,7 +71,8 @@ you put it.
     Open `assets/scenes/lime_room.usda`, then use the Property panel's **+ Add** button:
 
     1. Select `/World/LimeRoom/Objects/Banana`. Choose **+ Add ▸ Physics ▸ Rigid Body with Colliders Preset**, then
-       **+ Add ▸ Physics ▸ Mass**, and set *Mass* to 0.066.
+       **+ Add ▸ Physics ▸ Mass**, and set *Mass* to 0.066. Do the same for the `Mug` (0.118) and the `Bottle`
+       (0.603). The bottle can keep its *Convex Hull*; give the mug's mesh **Convex Decomposition** too (step 2).
     2. Expand the banana in the Stage panel and select its mesh. The preset gave it a **Convex Hull** collider.
        Change *Approximation* to **Convex Decomposition**.
 
@@ -146,7 +149,7 @@ grasp.
 ```mermaid
 flowchart LR
   a["1 · YOLO + depth<br/>find banana and bowl"] --> b["2 · look again<br/>from the side"] --> c["3 · drive to 16 cm"]
-  c --> d["4 · MoveIt<br/>pick"] --> e["5 · drive round the mug<br/>to the bowl"] --> f["6 · MoveIt<br/>place, fold"] --> g["7 · Nav2<br/>park"]
+  c --> d["4 · MoveIt<br/>pick"] --> e["5 · drive round the mug<br/>to the bowl"] --> f["6 · MoveIt<br/>place, fold"] --> g["7 · into the open<br/>Nav2 parks"]
 ```
 
 ??? example "The mission's main part: `lime_isaac_bringup/scripts/mission.py`"
@@ -214,6 +217,9 @@ Two rules keep this simple:
   drive in tutorial 07.
 - **Go round obstacles that Nav2 can't see.** The mug, the banana and the bowl are lower than the LiDAR's scan
   plane (16 cm), so they are not in Nav2's map. The mission approaches the bowl from its open side.
+- **Hand over to Nav2 in the open.** After the drop the robot stands right next to the mustard bottle. Nav2 does
+  see the bottle, but started that close to it, the first version of this mission drove straight through it. So
+  the mission backs away from the bowl and drives 60 cm into the open middle of the room before Nav2 takes over.
 
 ??? example "`turn_to()`, `drive_to()`, `to_base()`"
     ```python
@@ -279,14 +285,16 @@ goal stays active, and the next gripper command (open, above the bowl) replaces 
 ```text
 [13] ground truth: banana at [ 0.8   -0.121], bowl at [1.  0.4]
 [13] banana lifted (10 cm above the floor) at t = 45 s
-[13] banana in the bowl, 4.3 cm from its centre at t = 69 s
+[13] banana in the bowl, 3.7 cm from its centre at t = 69 s
 [13] arm folded at t = 71 s
-[13] robot parked in the far corner at t = 91 s
+[13] robot parked in the far corner at t = 95 s
 [13][check] ok   banana picked up (more than 10 cm above the floor)
 [13][check] ok   banana put into the bowl (within 7 cm of its centre)
 [13][check] ok   arm folded afterwards
 [13][check] ok   robot parked in the far corner (within 0.3 m)
-[13][check] ok   banana still in the bowl at the end (4.3 cm from its centre)
+[13][check] ok   banana still in the bowl at the end (3.7 cm from its centre)
+[13][check] ok   mug not bumped into (moved 0.0 cm)
+[13][check] ok   bottle not bumped into (moved 0.0 cm)
 [13][test] PASS
 ```
 
@@ -304,6 +312,8 @@ The banana lands about 4 cm from the bowl's centre, short of it, because the str
 | YOLO: *frisbee* instead of banana | a flat crescent seen from 5.8 cm above the floor | the medium model `yolo11m.pt` |
 | The banana estimate was 5 cm short | seen end-on, its far half hides behind its near half | look again from the side; use the middle of its length |
 | The mission hung after closing the gripper | the squeezing finger reports a velocity, so the controller never detects the stall | wait at most 3 s for the gripper |
+| The mug crept across the floor by itself | its convex-hull collider (the mug's mesh has a flat base, so the hull is the culprit, not the model) | `convexDecomposition` for the mug |
+| The robot drove through the mustard bottle on its way to park | the bottle had no collider, and Nav2 started right next to it | colliders for the mug and the bottle, and drive into the open before Nav2 takes over |
 | MoveIt: `Start state out of bounds … joint3` after driving | the folded pose (`joint3` = 1.85) sagged onto the joint limit (1.8567) | fold to `joint3` = 1.80 (tutorial 03's start pose and the SRDF) |
 
 ## Where to go from here
