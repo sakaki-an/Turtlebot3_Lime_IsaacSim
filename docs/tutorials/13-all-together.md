@@ -260,8 +260,8 @@ fingertips are then about 1 cm above the floor), closes the gripper, and lifts t
 
 ![Grasp: above the banana, down and close, lift](../assets/img/tutorial13_grasp.png){ .full }
 
-*Above the banana, down and close, lift. Two fingers pinching a curved banana act like a hinge, so the banana
-swings down as it is lifted. It is still held firmly.*
+*Above the banana, down and close, lift. Two fingers pinching a curved banana act like a hinge, so the banana can
+swing as the arm moves (watch the video). It is still held firmly.*
 
 ??? example "`top_down_ik()`"
     ```python

@@ -8,6 +8,7 @@ This project is released under the **Apache License 2.0** (see `LICENSE` and `NO
 |---|---|---|
 | [ROBOTIS-JAPAN-GIT/turtlebot3_lime](https://github.com/ROBOTIS-JAPAN-GIT/turtlebot3_lime) (`humble-devel`, commit `3363b27`) | robot description (xacro, meshes), MoveIt configuration, vendored in `ros2_ws/src/turtlebot3_lime/` and ported to Jazzy | Apache-2.0 |
 | [Turtlebot3_Lime_IsaacSim_Humble](https://github.com/momoiorg-repository/Turtlebot3_Lime_IsaacSim_Humble) | the Isaac Sim 4.5 / Humble predecessor of this project: topic and controller names | MIT |
+| [Turtlebot3_Lime_IsaacSim_Humble](https://github.com/momoiorg-repository/Turtlebot3_Lime_IsaacSim_Humble) `docs/imgs/lime1.jpg` | the photo of the real TurtleBot3 Lime (`docs/assets/img/real_lime.jpg`, `real_vs_sim.jpg`, resized), and the colours the simulated robot is painted with | MIT |
 | [realsense-ros](https://github.com/IntelRealSense/realsense-ros) `realsense2_description` | D435 camera mesh (`assets/urdf/meshes/d435.dae`) | Apache-2.0 |
 | [NVIDIA Isaac Sim 6.2](https://docs.isaacsim.omniverse.nvidia.com/6.2.0/) | the simulator, installed by you via pip | NVIDIA license (not redistributed here) |
 | [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/), Nav2, MoveIt 2, ros2_control | the ROS side, in the Docker container | Apache-2.0 / BSD |

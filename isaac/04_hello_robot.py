@@ -7,7 +7,7 @@
 No ROS, no graphs: the script talks to the robot directly through the Articulation API.
   * wheels  : a DifferentialController turns (forward speed, turn rate) into wheel speeds
               -> set_dof_velocity_targets()
-  * arm     : joint angles -> set_dof_position_targets()
+  * arm     : joint angles -> set_dof_position_targets(), moved smoothly (never jump: see move_arm)
   * gripper : finger position -> set_dof_position_targets() (the second finger follows by itself)
 
 The program: drive 0.6 m forward, turn 90 deg left, raise the arm, open and close the gripper, fold the arm.
@@ -73,24 +73,56 @@ def yaw():
     return math.atan2(2 * (w_ * z_ + x_ * y_), 1 - 2 * (y_ * y_ + z_ * z_))
 
 
+def tilt():
+    """How far the base leans (roll or pitch, degrees): 0 = flat on the floor."""
+    w_, x_, y_, z_ = robot.get_world_poses()[1].numpy()[0]
+    up_z = 1 - 2 * (x_ * x_ + y_ * y_)  # the z component of the robot's "up" axis
+    return math.degrees(math.acos(max(-1.0, min(1.0, up_z))))
+
+
+# --8<-- [start:move_arm]
+arm_motion = None  # (start time, duration, start angles, target angles)
+
+
+def move_arm(target, seconds=1.5):
+    """Move the arm SMOOTHLY to `target` in `seconds`, like a real arm controller (MoveIt in tutorial 12).
+
+    Never jump the position target: the drives then swing the arm at full servo speed (~4.7 rad/s), and the
+    reaction tips the whole robot onto its nose - the wheels are near the front and the base's centre of mass
+    is only ~4 cm behind the wheel axle (measured: up to 47 deg)."""
+    global arm_motion
+    arm_motion = (steps / 60.0, seconds, robot.get_dof_positions(dof_indices=arm).numpy()[0].copy(), np.array(target))
+
+
+def update_arm(t):
+    if arm_motion:
+        t0, duration, start, target = arm_motion
+        a = min(1.0, (t - t0) / duration)
+        a = 0.5 - 0.5 * math.cos(math.pi * a)  # 0 -> 1 with a smooth start and stop
+        robot.set_dof_position_targets([list(start + a * (target - start))], dof_indices=arm)
+# --8<-- [end:move_arm]
+
+
 # A tiny "program": (start time [s], action)
 program = [
     (0.5, lambda: drive(0.2, 0.0)),  # forward 0.2 m/s for 3 s  -> 0.6 m
     (3.5, lambda: drive(0.0, math.pi / 2 / 2.0)),  # turn left: 90 deg in 2 s
     (5.5, lambda: drive(0.0, 0.0)),
-    (6.0, lambda: robot.set_dof_position_targets([REACH], dof_indices=arm)),
+    (6.0, lambda: move_arm(REACH)),
     (8.0, lambda: robot.set_dof_position_targets([[lime.GRIPPER_OPEN]], dof_indices=gripper)),
     (9.0, lambda: robot.set_dof_position_targets([[lime.GRIPPER_CLOSED]], dof_indices=gripper)),
-    (10.0, lambda: robot.set_dof_position_targets([lime.ARM_HOME], dof_indices=arm)),
+    (10.0, lambda: move_arm(lime.ARM_HOME)),
 ]
-log = {}
+log = {"tilt": 0.0}
 steps = 0
 while simulation_app.is_running():
     t = steps / 60.0
     while program and t >= program[0][0]:
         program.pop(0)[1]()
+    update_arm(t)
     simulation_app.update()
     steps += 1
+    log["tilt"] = max(log["tilt"], tilt())
     if recorder:
         recorder.capture()
     if steps == int(3.5 * 60):
@@ -112,6 +144,7 @@ if args.test:
         f"turned left to {log['yaw_after_turn']:.1f} deg (commanded 90)": abs(log["yaw_after_turn"] - 90.0) < 8.0,
         f"arm reached the reach pose (max error {arm_err:.3f} rad)": arm_err < 0.05,
         f"gripper opened to {log['gripper_open']:.4f} m": log["gripper_open"] > 0.015,
+        f"base stayed flat on the floor while the arm moved (max tilt {log['tilt']:.1f} deg)": log["tilt"] < 2.0,
     }
     for text, passed in checks.items():
         print(f"[04][check] {'ok  ' if passed else 'FAIL'} {text}")

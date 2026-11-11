@@ -3,8 +3,8 @@
 <p class="tutorial-meta">⏱ 25 min · Level: beginner → intermediate · Script: <code>isaac/03_tune_robot.py</code></p>
 
 **Goal.** Make the imported Lime simulate well. The arm should hold its pose, the wheels should follow
-velocity commands, the casters should slide, and the gripper should open and close. The tuning goes
-into its own USD file, so a re-import never loses it.
+velocity commands, the casters should slide, and the gripper should open and close. Then make it **look like the
+real robot**. The tuning goes into its own USD file, so a re-import never loses it.
 
 <figure class="result" markdown>
 <video controls autoplay loop muted playsinline>
@@ -72,6 +72,34 @@ Measured: command 0.2 m/s and 0.5 rad/s, then read the robot's real yaw rate:
 So the tuned asset switches the cylinder's collision off and adds an invisible sphere collider (`sphere_collider`,
 purpose *guide*) to each wheel link. The visible tyre mesh is unchanged.
 
+### Looks: the real robot's colours
+
+The URDF paints the whole robot grey. The real Lime is black and lime green: black waffle plates and Dynamixel
+servos, lime-green 3D-printed brackets, translucent yellow-green tyres with lime hubs, metal standoffs, and the
+LiDAR on a lime mount. The colours below were measured from a photo of the real robot.
+
+![The real TurtleBot3 Lime (left, photo: Momoi Open Source) and the tuned simulated Lime (right)](../assets/img/real_vs_sim.jpg){ .full }
+
+One mesh per link is too coarse: `link2.stl`, for example, holds a servo, a bracket and four screws. But inside the
+mesh these are separate **solids**: groups of triangles that don't share a vertex with the rest. The script splits
+every mesh into its solids and colours each one by its size: a 28 × 42 × 46 mm block is a Dynamixel servo
+(black), other arm parts are brackets (lime), the wheel's 120 mm ring is the tyre and its 84 mm disc the hub.
+Only the look changes. The colliders, the masses and the joints are untouched.
+
+??? example "The colours and the rules: `isaac/common/looks.py`"
+    ```python
+    --8<-- "isaac/common/looks.py:colours"
+    ```
+
+    ```python
+    --8<-- "isaac/common/looks.py:classify"
+    ```
+
+!!! info "Instanced meshes"
+    The importer stores each link's visual mesh as an *instance*: a shared, read-only copy. To colour parts of
+    it, the script first switches instancing off for the visual meshes (`SetInstanceable(False)`, an override in
+    the tuned layer). The colliders stay instanced.
+
 ### Solver iterations
 
 An articulation (the robot's joint tree) is solved iteratively. Raising the articulation's
@@ -91,6 +119,7 @@ treats more, and it prints a warning.
 | Tyres / casters | friction 1.0 (average) / friction 0.0 (**min**) |
 | Tyre collision shape | **sphere**, r = 0.06 m, instead of the URDF cylinder |
 | Articulation | 64 position / 4 velocity solver iterations |
+| Look | black plates and servos, lime brackets, translucent yellow-green tyres, lime hubs, metal standoffs (`common/looks.py`) |
 
 ## Tune it
 
@@ -124,6 +153,12 @@ treats more, and it prints a warning.
     **Solver.** Select `base_link` (the articulation root). In its **Articulation Root** / **PhysxArticulationAPI**
     properties set *Solver Position Iteration Count* = 64 and *Solver Velocity Iteration Count* = 4.
 
+    **Looks** (these GUI steps describe what the script does; the script is the verified path). **Create ▸
+    Material ▸ OmniPBR** for each colour and set its *Albedo* colour. Select a link's visual prim, for example
+    `link4/link4`, untick **Instanceable** in the Property panel (instanced prims are read-only), then pick the
+    material under **Materials on selected models**. In the GUI you colour whole meshes; colouring the solids
+    *inside* a mesh separately (servo black, bracket lime) is what the script adds.
+
     **Save as an override layer.** Instead of editing the imported files, create a new stage and add the
     imported robot as a reference (**File ▸ Add Reference**). Make your edits there, then **File ▸ Save As**
     `assets/usd/turtlebot3_lime_tuned.usda`. Your edits are stored as *overs* on top of the
@@ -151,11 +186,14 @@ treats more, and it prints a warning.
     drive.CreateTargetPositionAttr(math.degrees(home))                 # (3)!
 
     PhysxSchema.PhysxMaterialAPI.Apply(caster_material).CreateFrictionCombineModeAttr("min")
+
+    looks.paint_like_the_real_lime(stage, "/turtlebot3_lime")       # (4)!
     ```
 
     1. Users of the tuned file no longer have to pick the physics variant.
     2. N·m/rad → N·m/deg.
     3. USD joint angles are in degrees too.
+    4. The real robot's colours, solid by solid (see *Looks* above).
 
     ??? example "Full script: `isaac/03_tune_robot.py`"
         ```python
@@ -165,13 +203,14 @@ treats more, and it prints a warning.
 ## Check the result
 
 ```text
-[03] arm max error after 2 s : 0.013 rad
-[03] distance in 3 s         : 0.874 m (ideal 0.90 m)
+[03] painted like the real Lime: black 645338 faces, servo 38830 faces, lime 45098 faces, tyre 5848 faces, hub 8444 faces, metal 3864 faces
+[03] arm max error after 2 s : 0.002 rad
+[03] distance in 3 s         : 0.873 m (ideal 0.90 m)
 [03] gripper left / right    : 0.0190 / 0.0190 m (target 0.019)
 [03][test] PASS
 ```
 
-- The arm holds `home` against gravity to within 0.013 rad (< 1°).
+- The arm holds `home` against gravity to within 0.002 rad (0.1°).
 - 5 rad/s × 0.06 m = 0.30 m/s, so 0.90 m in 3 s. The missing 2.6 cm is the acceleration phase.
 - The right finger copies the left one exactly: the mimic joint works under PhysX.
 

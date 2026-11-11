@@ -7,7 +7,8 @@ Right after the URDF import (tutorial 02) the robot is *not* ready to simulate:
   * every joint drive has stiffness = damping = 0, so the arm collapses under gravity and the
     wheels cannot be driven;
   * the two small caster pads use the default friction, so they drag on the floor when turning;
-  * the arm starts stretched out at 0 rad instead of the folded "home" pose.
+  * the arm starts stretched out at 0 rad instead of the folded "home" pose;
+  * the URDF paints the whole robot grey - the real Lime is black and lime green.
 
 This script writes the fixes into a NEW layer, assets/usd/turtlebot3_lime_tuned.usda, that *references*
 the imported asset. The imported files stay untouched, so re-running tutorial 02 never loses the tuning.
@@ -30,7 +31,7 @@ simulation_app = SimulationApp({"headless": args.headless, "width": 1280, "heigh
 import isaacsim.core.experimental.utils.app as app_utils
 import isaacsim.core.experimental.utils.stage as stage_utils
 import numpy as np
-from common import lime
+from common import lime, looks
 from common.paths import LIME_IMPORTED_USD, LIME_USD
 from isaacsim.core.experimental.objects import GroundPlane
 from isaacsim.core.experimental.prims import Articulation
@@ -147,6 +148,11 @@ for link in lime.WHEEL_JOINTS:
 articulation = PhysxSchema.PhysxArticulationAPI.Apply(stage.GetPrimAtPath(f"/turtlebot3_lime/{lime.ARTICULATION_ROOT}"))
 articulation.CreateSolverPositionIterationCountAttr(SOLVER_ITERATIONS[0])
 articulation.CreateSolverVelocityIterationCountAttr(SOLVER_ITERATIONS[1])
+
+# 4b. Looks: the colours of the real Lime ---------------------------------------------------------------
+# Black plates and servos, lime-green brackets, translucent yellow-green tyres (common/looks.py).
+painted = looks.paint_like_the_real_lime(stage, "/turtlebot3_lime")
+print(f"[03] painted like the real Lime: {', '.join(f'{name} {n} faces' for name, n in painted.items())}", flush=True)
 
 layer.Save()
 print(f"[03] wrote tuned robot: {LIME_USD}")

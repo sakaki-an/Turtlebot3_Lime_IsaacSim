@@ -17,6 +17,8 @@ It includes or is derived from the following third-party work:
    https://github.com/momoiorg-repository/Turtlebot3_Lime_IsaacSim_Humble
    Copyright (c) 2025 An - MIT License
    Used as the reference for topic and controller names (Isaac Sim 4.5 / Humble version).
+   The photo of the real TurtleBot3 Lime (docs/assets/img/real_lime.jpg, and the left half of
+   docs/assets/img/real_vs_sim.jpg) is that repository's docs/imgs/lime1.jpg, resized.
 
 3. Nav2 (nav2_bringup), https://github.com/ros-navigation/navigation2 - Apache License 2.0
    ros2_ws/src/lime_isaac_bringup/config/nav2_params.yaml is generated from nav2_bringup's

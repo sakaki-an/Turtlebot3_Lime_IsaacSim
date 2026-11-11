@@ -7,6 +7,18 @@ and a 2D LiDAR.
 The tutorials follow the structure of NVIDIA's own Isaac Sim tutorials. Every step uses the Lime,
 and every step is written for people who are **opening Isaac Sim for the first time**.
 
+## The real robot and its twin
+
+<figure class="result" markdown>
+![The real TurtleBot3 Lime (left) and the simulated one in Isaac Sim (right)](assets/img/real_vs_sim.jpg){ .full }
+<figcaption>Left: the real TurtleBot3 Lime (photo: Momoi Open Source). Right: the simulated Lime in Isaac Sim, built in these tutorials from the real robot's ROS packages: the same URDF, joints, sensors and topic names, and the real robot's colours (tutorial 03).</figcaption>
+</figure>
+
+The **TurtleBot3 Lime** is ROBOTIS Japan's mobile manipulator: a TurtleBot3 base with large wheels, a 6-joint arm
+with a gripper (Dynamixel XM430 servos, 3D-printed lime-green brackets), an Intel RealSense D435 camera at the
+front and an LDS 2D LiDAR on top. Everything on the ROS side of these tutorials uses the real robot's topic and
+frame names, so what you build in simulation is meant to carry over to the hardware.
+
 <figure class="result" markdown>
 <video controls autoplay loop muted playsinline>
   <source src="assets/video/tutorial13_all_together.mp4" type="video/mp4">

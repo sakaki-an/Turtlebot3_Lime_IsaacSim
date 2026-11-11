@@ -156,5 +156,6 @@ The script prints the articulation it found:
 | The arm collapses | joint drives were imported with `maxForce` but **stiffness = damping = 0** | [03](03-tune-robot.md) |
 | The wheels can't be driven | same: a velocity drive needs damping > 0 | [03](03-tune-robot.md) |
 | The right gripper finger | follows the left one through a **mimic joint** (`NewtonMimicAPI`, from the URDF `<mimic>` tag) | works already |
+| The robot is grey | the URDF gives every link one plain colour; the real Lime is black and lime green | [03](03-tune-robot.md) |
 
 **Next:** [03 · Tune the robot](03-tune-robot.md)

@@ -10,6 +10,11 @@ a Docker container next to Isaac Sim.
 
 ![TurtleBot3 Lime puts a banana into a bowl in Isaac Sim](docs/assets/img/tutorial13_all_together.png)
 
+![The real TurtleBot3 Lime and its twin in Isaac Sim](docs/assets/img/real_vs_sim.jpg)
+
+*Left: the real TurtleBot3 Lime (photo: [Momoi Open Source](https://github.com/momoiorg-repository)). Right: the
+simulated Lime in Isaac Sim, painted with the real robot's colours (tutorial 03).*
+
 ## Quick start
 
 ```bash

@@ -63,10 +63,15 @@ class Recorder:
             return
         data = self._annotator.get_data()
         if data is None or getattr(data, "size", 0) == 0:
-            # Timeline not playing (e.g. a still of an edited stage): render one frame explicitly.
             import omni.replicator.core as rep
+            import omni.timeline
 
-            rep.orchestrator.step(rt_subframes=4)
+            playing = omni.timeline.get_timeline_interface().is_playing()
+            if playing and not force:
+                return  # the renderer is still warming up; later calls get frames
+            # Render one frame explicitly (e.g. a still of a stage that is not playing). Never pause the
+            # timeline: rep.orchestrator.step() does that by default, and the simulation would stop.
+            rep.orchestrator.step(rt_subframes=4, pause_timeline=False)
             data = self._annotator.get_data()
         if data is not None and getattr(data, "size", 0) > 0:
             self.frames.append(np.asarray(data)[:, :, :3].copy())
