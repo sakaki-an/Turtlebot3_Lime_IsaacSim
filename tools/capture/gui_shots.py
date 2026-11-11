@@ -468,14 +468,25 @@ async def shot_09_lidar_viewport():
 
 
 async def shot_11_occupancy_map():
+    from pxr import Usd, UsdGeom, UsdPhysics
+
     await lime_room_scene(with_robot=False)
+    stage = stage_utils.get_current_stage()
+    for name in ("Banana", "Mug", "Bowl", "Bottle"):  # tutorial 11 GUI step: colliders for the objects
+        select(f"/World/LimeRoom/Objects/{name}")
+        await frames(30)
+        await property_add("Physics/Colliders Preset")
+        meshes = [p for p in Usd.PrimRange(stage.GetPrimAtPath(f"/World/LimeRoom/Objects/{name}")) if p.IsA(UsdGeom.Mesh)]
+        print(f"[gui] {name}: colliders {[p.HasAPI(UsdPhysics.CollisionAPI) for p in meshes]}", flush=True)
+    select()
     ViewportManager.set_camera_view("/OmniverseKit_Persp", eye=(1.0, -0.01, 9.0), target=(1.0, 0.0, 0.0))
     await ui_test.menu_click("Tools/Robotics/Occupancy Map")
     await frames(90)
     fields = ui_test.find_all("Occupancy Map//Frame/**/FloatDrag[*]") or ui_test.find_all("Occupancy Map//Frame/**/FloatField[*]")
     print(f"[gui] occupancy map fields: {len(fields)}", flush=True)
-    # widget order in the window: cell size, origin xyz, upper bound xyz, lower bound xyz (values of tutorial 11)
-    values = [0.05, 0.5, 0.0, 0.16, 3.7, 2.7, 0.0, -2.7, -2.7, 0.0]
+    # widget order in the window: cell size, origin xyz, upper bound xyz, lower bound xyz (values of tutorial 11):
+    # origin at 16 cm, the band from 1 cm (-0.15) to 50 cm (+0.34) above the floor
+    values = [0.05, 0.5, 0.0, 0.16, 3.7, 2.7, 0.34, -2.7, -2.7, -0.15]
     for w, v in zip(fields, values):
         w.model.set_value(v)
         await frames(2)

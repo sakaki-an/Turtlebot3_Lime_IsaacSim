@@ -35,12 +35,12 @@ from isaacsim.core.simulation_manager import SimulationManager
 graphs.enable_ros2_realtime(simulation_app)
 
 stage = stage_utils.create_new_stage(template="empty")
-build_lime_room(stage)
+build_lime_room(stage, object_physics=True)  # real objects: colliders and mass (tutorial 11)
 while stage_utils.is_stage_loading():
     simulation_app.update()
 robot_path = "/World/turtlebot3_lime"
 articulation_root = lime.add_lime(robot_path)
-setup_pick_and_place(stage, robot_path)  # the banana can be picked up, the bowl holds it
+setup_pick_and_place(stage, robot_path)  # a bigger bowl, grippy fingers
 
 graphs.create_clock_graph()  # 06
 graphs.create_drive_graph(articulation_root)  # 06  /cmd_vel   <- Nav2

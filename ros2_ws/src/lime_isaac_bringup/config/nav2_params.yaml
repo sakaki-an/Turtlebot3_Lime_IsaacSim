@@ -6,6 +6,7 @@
 #     inflation 0.30 m, LiDAR ranges of the LDS-01 (0.12 - 3.5 m)
 #   * AMCL: LDS-01 range, initial pose = the robot's start pose (0, 0, 0) in the lime_room map
 #   * speed limits: 0.3 m/s, 1.2 rad/s (the Lime can do ~0.48 m/s; slower is safer indoors)
+#   * local costmap: + static_layer (the map has low objects the LiDAR cannot see; the controller must avoid them)
 amcl:
   ros__parameters:
     alpha1: 0.2
@@ -125,7 +126,8 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      plugins: [voxel_layer, inflation_layer]
+      # Lime: + static_layer, so the controller also avoids the low objects that are only in the map
+      plugins: [static_layer, voxel_layer, inflation_layer]
       inflation_layer: {plugin: 'nav2_costmap_2d::InflationLayer', cost_scaling_factor: 3.0, inflation_radius: 0.3}
       voxel_layer:
         plugin: nav2_costmap_2d::VoxelLayer

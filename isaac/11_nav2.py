@@ -32,14 +32,14 @@ import isaacsim.core.experimental.utils.app as app_utils
 import isaacsim.core.experimental.utils.stage as stage_utils
 import numpy as np
 from common import graphs, lime, sensors
-from common.scene import build_lime_room
-from isaacsim.core.experimental.prims import Articulation
+from common.scene import OBJECTS, build_lime_room
+from isaacsim.core.experimental.prims import Articulation, XformPrim
 from isaacsim.core.simulation_manager import SimulationManager
 
 graphs.enable_ros2_realtime(simulation_app)
 
 stage = stage_utils.create_new_stage(template="empty")
-build_lime_room(stage)
+build_lime_room(stage, object_physics=True)  # real objects: the robot must not drive through them
 while stage_utils.is_stage_loading():
     simulation_app.update()
 robot_path = "/World/turtlebot3_lime"
@@ -64,13 +64,31 @@ print("[11] ready: start Nav2 (ros2 launch lime_isaac_bringup navigation.launch.
 
 goal = np.array(args.goal)
 steps, reached_at, path = 0, None, []
+objects = {name: XformPrim(f"/World/LimeRoom/Objects/{name}") for name, *_ in OBJECTS}
+rest, closest = {}, {name: 9.9 for name in objects}  # where the objects rest; closest approach of the robot
+
+
+def footprint_distance(robot_pose, point):
+    """Distance from a point to the robot's footprint (the Nav2 rectangle), 0 = inside."""
+    (x, y, _), (w, qx, qy, qz) = robot_pose
+    yaw = math.atan2(2 * (w * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz))
+    dx, dy = point[0] - x, point[1] - y
+    fx, fy = dx * math.cos(yaw) + dy * math.sin(yaw), -dx * math.sin(yaw) + dy * math.cos(yaw)
+    return math.hypot(max(-0.205 - fx, 0.0, fx - 0.075), max(-0.165 - fy, 0.0, fy - 0.165))
 while simulation_app.is_running():
     simulation_app.update()
     steps += 1
     if recorder:
         recorder.capture()
     if args.test or args.record:
-        xy = robot.get_world_poses()[0].numpy()[0, :2]
+        pos, quat = robot.get_world_poses()
+        xy = pos.numpy()[0, :2]
+        if steps == 60:  # the objects have settled
+            rest = {name: prim.get_world_poses()[0].numpy()[0].copy() for name, prim in objects.items()}
+        if rest and steps % 6 == 0:
+            for name, prim in objects.items():
+                d = footprint_distance((pos.numpy()[0], quat.numpy()[0]), prim.get_world_poses()[0].numpy()[0])
+                closest[name] = min(closest[name], d)
         if steps % 30 == 0:
             path.append(xy.copy())
         if reached_at is None and np.linalg.norm(xy - goal) < 0.25:
@@ -84,6 +102,15 @@ if args.test:
     ok = reached_at is not None
     length = sum(np.linalg.norm(b - a) for a, b in zip(path, path[1:]))
     print(f"[11][check] {'ok  ' if ok else 'FAIL'} robot reached ({goal[0]}, {goal[1]}) within 0.25 m (ground truth); driven {length:.2f} m")
+    for name, prim in objects.items():  # Nav2 must steer round the low objects, which only the map knows about
+        if name == "Bowl":  # static: it cannot move, so only report how close the robot came
+            print(f"[11] bowl (static): closest approach of the robot's footprint to its centre: {closest[name] * 100:.0f} cm")
+            continue
+        moved = np.linalg.norm(prim.get_world_poses()[0].numpy()[0] - rest[name])
+        untouched = moved < 0.01
+        ok = ok and untouched
+        print(f"[11][check] {'ok  ' if untouched else 'FAIL'} {name.lower()} not touched (moved {moved * 100:.1f} cm); "
+              f"closest approach of the robot's footprint to its centre: {closest[name] * 100:.0f} cm")
     print(f"[11][test] {'PASS' if ok else 'FAIL'}")
 if recorder:
     recorder.save()

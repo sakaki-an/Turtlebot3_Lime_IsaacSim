@@ -10,6 +10,7 @@ The walls and obstacles are simple boxes: they are easy to see for the LiDAR, ha
 physics, and give a clean occupancy map for Nav2 (tutorial 11).
 
     build_lime_room(stage)          # adds /World/LimeRoom to the current stage
+    build_lime_room(stage, object_physics=True)   # ... with real objects: colliders and mass (tutorials 11, 13)
     python isaac/common/scene.py    # (re)writes assets/scenes/lime_room.usda for the GUI tutorials
 """
 
@@ -37,7 +38,7 @@ OBJECTS = [
 ]
 
 
-def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = True):
+def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = True, object_physics: bool = False):
     import math
 
     from isaacsim.core.experimental.objects import Cube, GroundPlane
@@ -81,27 +82,24 @@ def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = T
             XformPrim(path, reset_xform_op_properties=True).set_world_poses(
                 positions=[[x, y, half_height + 0.002]], orientations=[[cz * cx, cz * sx, sz * sx, sz * cx]]
             )
+        if object_physics:
+            add_object_physics(stage, root)
     return root
 
 
-# --8<-- [start:setup_pick_and_place]
-BOWL_SCALE = 1.5  # tutorial 13: the 19 cm banana fits into a 24 cm bowl, not into the 16 cm original
+# --8<-- [start:add_object_physics]
+def add_object_physics(stage, root: str = "/World/LimeRoom"):
+    """Make the objects real: colliders and mass, so the robot cannot drive through them (tutorials 11, 13).
 
-
-def setup_pick_and_place(stage, robot_path: str, root: str = "/World/LimeRoom"):
-    """Tutorial 13: make the objects real - the banana something the gripper can hold, the bowl a container,
-    the mug and the bottle things the robot would knock over if it drove into them.
-
-    In tutorials 08-12 the objects are only pictures for the camera: no collider, no mass. Here:
-      * banana: rigid body (it falls, can be pushed and lifted), 66 g, a convex-decomposition collider
-        (a single convex hull would make the curved banana a 7 cm wide blob, too wide for the gripper)
-      * mug, bottle: rigid bodies with their real masses; the bottle gets a convex hull, the mug a convex
-        decomposition (with a convex hull the mug crept across the floor by itself)
-      * bowl:   1.5x bigger, a static collider that keeps its exact (concave) shape
-      * fingers and banana: rubber-like friction 1.0, so a 10 N squeeze holds the banana
+    Without this (tutorials 08-10) they are only pictures for the camera. With it:
+      * banana, mug, bottle: rigid bodies with their real (YCB) masses: they fall, can be pushed, knocked over
+        and lifted. Colliders: a convex decomposition for the banana (a single convex hull would make the
+        curved banana a 7 cm wide blob, too wide for the gripper) and for the mug (with a convex hull it crept
+        across the floor by itself); a convex hull for the bottle.
+      * bowl: a static collider (it never moves) that keeps its exact, hollow shape ("none" = the triangle mesh
+        itself, which PhysX allows for static objects only)
     """
-    from isaacsim.core.experimental.prims import XformPrim
-    from pxr import PhysxSchema, Usd, UsdGeom, UsdPhysics, UsdShade
+    from pxr import PhysxSchema, Usd, UsdGeom, UsdPhysics
 
     def colliders(prim, approximation):
         for p in Usd.PrimRange(prim):
@@ -109,31 +107,45 @@ def setup_pick_and_place(stage, robot_path: str, root: str = "/World/LimeRoom"):
                 UsdPhysics.CollisionAPI.Apply(p)
                 UsdPhysics.MeshCollisionAPI.Apply(p).CreateApproximationAttr(approximation)
 
-    banana = stage.GetPrimAtPath(f"{root}/Objects/Banana")
-    UsdPhysics.RigidBodyAPI.Apply(banana)
-    UsdPhysics.MassAPI.Apply(banana).CreateMassAttr(0.066)
-    body = PhysxSchema.PhysxRigidBodyAPI.Apply(banana)
-    body.CreateSolverPositionIterationCountAttr(32)  # an object squeezed between two fingers needs more iterations
-    colliders(banana, "convexDecomposition")
-
-    for name, mass, approximation in (("Mug", 0.118, "convexDecomposition"), ("Bottle", 0.603, "convexHull")):
-        prim = stage.GetPrimAtPath(f"{root}/Objects/{name}")  # mass in kg: the YCB objects' real masses
+    for name, mass, approximation in (
+        ("Banana", 0.066, "convexDecomposition"),
+        ("Mug", 0.118, "convexDecomposition"),
+        ("Bottle", 0.603, "convexHull"),
+    ):
+        prim = stage.GetPrimAtPath(f"{root}/Objects/{name}")
         UsdPhysics.RigidBodyAPI.Apply(prim)
-        UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(mass)
+        UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(mass)  # kg
         colliders(prim, approximation)
+    # a banana squeezed between two fingers (tutorial 13) needs more solver iterations
+    banana = stage.GetPrimAtPath(f"{root}/Objects/Banana")
+    PhysxSchema.PhysxRigidBodyAPI.Apply(banana).CreateSolverPositionIterationCountAttr(32)
+    colliders(stage.GetPrimAtPath(f"{root}/Objects/Bowl"), "none")
+# --8<-- [end:add_object_physics]
 
-    bowl_path = f"{root}/Objects/Bowl"
+
+# --8<-- [start:setup_pick_and_place]
+BOWL_SCALE = 1.5  # tutorial 13: the 19 cm banana fits into a 24 cm bowl, not into the 16 cm original
+
+
+def setup_pick_and_place(stage, robot_path: str, root: str = "/World/LimeRoom"):
+    """Tutorial 13, on top of add_object_physics(): a bowl the banana fits into, and grippy fingers.
+      * bowl: 1.5x bigger (its static collider scales with it)
+      * fingers and banana: rubber-like friction 1.0, so a 10 N squeeze holds the banana
+    """
+    from isaacsim.core.experimental.prims import XformPrim
+    from pxr import Usd, UsdPhysics, UsdShade
+
     _name, _asset, x, y, _yaw, half_height, _up, _coco = next(o for o in OBJECTS if o[0] == "Bowl")
-    bowl = XformPrim(bowl_path)
+    bowl = XformPrim(f"{root}/Objects/Bowl")
     bowl.set_local_scales([[BOWL_SCALE] * 3])
-    position, orientation = bowl.get_world_poses()
+    _position, orientation = bowl.get_world_poses()
     bowl.set_world_poses(positions=[[x, y, BOWL_SCALE * half_height + 0.002]], orientations=orientation)
-    colliders(stage.GetPrimAtPath(bowl_path), "none")  # "none" = the triangle mesh itself (static objects only)
 
     rubber = UsdShade.Material.Define(stage, f"{root}/PhysicsMaterials/rubber")
     api = UsdPhysics.MaterialAPI.Apply(rubber.GetPrim())
     api.CreateStaticFrictionAttr(1.0)
     api.CreateDynamicFrictionAttr(1.0)
+    banana = stage.GetPrimAtPath(f"{root}/Objects/Banana")
     fingers = [p for p in Usd.PrimRange(stage.GetPrimAtPath(robot_path)) if p.GetName() in ("gripper_left_link", "gripper_right_link")]
     for prim in [banana, *fingers]:
         UsdShade.MaterialBindingAPI.Apply(prim).Bind(rubber, UsdShade.Tokens.weakerThanDescendants, "physics")

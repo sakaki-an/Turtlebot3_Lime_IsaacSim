@@ -6,15 +6,19 @@
 Writes ros2_ws/src/lime_isaac_bringup/maps/lime_room.pgm + lime_room.yaml (the ROS map_server format).
 
 The generator (extension isaacsim.asset.gen.omap) checks, cell by cell, whether a physics collider occupies a
-thin horizontal slice of the scene. We map the slice at the LiDAR's height (16 cm): exactly what the LDS-01
-can see, which is what AMCL compares its scans with.
+height band of the scene, and flattens the band into one 2D map. We map everything from 1 cm to 50 cm above the
+floor: the walls and obstacles the LiDAR sees (its scan plane is 16 cm high), AND the low objects on the floor
+that it cannot see - the banana, the mug and the bowl. Nav2 must avoid them too.
 """
 
 import sys
 
 from common.cli import parse_args
 
-args = parse_args(__doc__.splitlines()[0])
+args = parse_args(
+    __doc__.splitlines()[0],
+    extra=lambda p: p.add_argument("--out", default=None, help="write the map to this folder instead"),
+)
 
 from isaacsim import SimulationApp
 
@@ -24,12 +28,14 @@ import isaacsim.core.experimental.utils.app as app_utils
 import isaacsim.core.experimental.utils.stage as stage_utils
 import numpy as np
 from common.paths import IMG_DIR, REPO_ROOT
-from common.scene import ROOM_X, ROOM_Y, WALL_THICKNESS, build_lime_room
+from common.scene import OBJECTS, ROOM_X, ROOM_Y, WALL_THICKNESS, build_lime_room
 from isaacsim.core.simulation_manager import SimulationManager
 
 RESOLUTION = 0.05  # m per cell (the usual value for small indoor robots)
-SLICE_Z = 0.16  # m: height of the LiDAR (base_scan)
+BAND = (0.01, 0.50)  # m above the floor: from just above the floor (not the floor itself) to above the objects
 MAP_DIR = REPO_ROOT / "ros2_ws" / "src" / "lime_isaac_bringup" / "maps"
+if args.out:
+    MAP_DIR = REPO_ROOT / args.out
 
 app_utils.enable_extension("isaacsim.asset.gen.omap")
 simulation_app.update()
@@ -38,7 +44,7 @@ import omni.usd
 from isaacsim.asset.gen.omap.bindings import _omap
 
 stage = stage_utils.create_new_stage(template="empty")
-build_lime_room(stage)  # the room only - no robot (the robot must not end up in its own map)
+build_lime_room(stage, object_physics=True)  # the room and the objects' colliders - no robot (not in its own map)
 while stage_utils.is_stage_loading():
     simulation_app.update()
 
@@ -50,9 +56,9 @@ for _ in range(10):
 
 # Map the inside of the room plus the walls (bounds are offsets from the origin).
 pad = WALL_THICKNESS + 0.1
-origin = (0.5, 0.0, SLICE_Z)  # any FREE point inside the room
-lo = (ROOM_X[0] - pad - origin[0], ROOM_Y[0] - pad - origin[1], 0.0)
-hi = (ROOM_X[1] + pad - origin[0], ROOM_Y[1] + pad - origin[1], 0.0)
+origin = (0.5, 0.0, 0.16)  # any FREE point inside the room
+lo = (ROOM_X[0] - pad - origin[0], ROOM_Y[0] - pad - origin[1], BAND[0] - origin[2])
+hi = (ROOM_X[1] + pad - origin[0], ROOM_Y[1] + pad - origin[1], BAND[1] - origin[2])
 generator = _omap.Generator(omni.physx.get_physx_interface(), omni.usd.get_context().get_stage_id())
 generator.update_settings(RESOLUTION, 4.0, 5.0, 6.0)  # cell size, occupied / free / unknown marker values
 generator.set_transform(origin, lo, hi)
@@ -105,7 +111,10 @@ if args.test or args.record:
         "pillar (2.0, -1.2) occupied": cell(2.0, -1.2) == 0,
         "robot start (0, 0) free": cell(0.0, 0.0) == 254,
         "room centre (1.0, -0.5) free": cell(1.0, -0.5) == 254,
+        "between the start and the objects (0.4, -0.1) free": cell(0.4, -0.1) == 254,
     }
+    for name, _asset, x, y, *_rest in OBJECTS:  # the low objects the LiDAR cannot see must be in the map
+        checks[f"{name.lower()} ({x}, {y}) occupied"] = cell(x, y) == 0
     for text, passed in checks.items():
         print(f"[11][check] {'ok  ' if passed else 'FAIL'} {text}")
     ok = all(checks.values())

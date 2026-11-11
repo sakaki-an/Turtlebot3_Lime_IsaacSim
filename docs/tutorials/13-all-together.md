@@ -54,17 +54,17 @@ flowchart LR
 
 ## Objects you can pick up
 
-In tutorials 08–12 the objects on the floor are only pictures for the camera: they have no collider and no mass.
-The arm, or the whole robot, would pass straight through them. To pick something up, the object needs physics, and
-so does the place you put it. The other objects get physics too, so they would really be knocked over if the
-robot drove into them.
+In tutorials 08–10 the objects on the floor are only pictures for the camera: they have no collider and no mass.
+Since [tutorial 11](11-nav2.md) they are real (`add_object_physics`): colliders and mass, so the robot cannot drive
+through them, and they would be knocked over if it drove into them. Picking one up needs two more things: a bowl
+the banana fits into, and grippy fingers.
 
 | Object | Physics | Why |
 |---|---|---|
 | banana | rigid body, 66 g, *convex decomposition* collider | it must fall, be pushed and be lifted. A single convex hull would turn the curved banana into a blob 7 cm wide, too wide for the gripper |
 | mug, mustard bottle | rigid bodies, 118 g and 603 g; *convex decomposition* for the mug, *convex hull* for the bottle | they would be knocked over if the robot drove into them. With the default convex hull the mug crept 16 cm across the floor by itself in 5 s; with a convex decomposition it stands still |
-| bowl | static collider, *none* (the exact triangle mesh), **1.5× bigger** | it must hold the banana in its hollow; the 19 cm banana does not fit in the original 16 cm bowl |
-| fingers + banana | physics material, friction 1.0 | rubber-like pads, so a 10 N squeeze holds the banana |
+| bowl | static collider, *none* (the exact triangle mesh), and in this tutorial **1.5× bigger** | it must hold the banana in its hollow; the 19 cm banana does not fit in the original 16 cm bowl |
+| fingers + banana | physics material, friction 1.0 (this tutorial) | rubber-like pads, so a 10 N squeeze holds the banana |
 
 === "GUI"
 
@@ -96,7 +96,14 @@ robot drove into them.
 
 === "Python (standalone)"
 
-    `13_all_together.py` builds the same scene as tutorials 08–11 and then calls one extra function:
+    `13_all_together.py` builds the same scene as tutorial 11, with `object_physics=True`:
+
+    ??? example "`add_object_physics()`: colliders and mass for every object (tutorials 11 and 13)"
+        ```python
+        --8<-- "isaac/common/scene.py:add_object_physics"
+        ```
+
+    and then calls one extra function for the bowl and the fingers:
 
     ```python
     --8<-- "isaac/common/scene.py:setup_pick_and_place"
@@ -215,8 +222,8 @@ Two rules keep this simple:
   55° further round. Then it drives the last 30 cm blind: close up, the low camera no longer sees the banana properly (at
   16 cm the image's lower edge cuts it off), and Isaac Sim's odometry was within 3 mm of the truth after a 0.8 m
   drive in tutorial 07.
-- **Go round obstacles that Nav2 can't see.** The mug, the banana and the bowl are lower than the LiDAR's scan
-  plane (16 cm), so they are not in Nav2's map. The mission approaches the bowl from its open side.
+- **Go round the objects yourself.** These short drives don't use Nav2, so nothing plans round the mug: the
+  mission approaches the bowl from its open side.
 - **Hand over to Nav2 in the open.** After the drop the robot stands right next to the mustard bottle. Nav2 does
   see the bottle, but started that close to it, the first version of this mission drove straight through it. So
   the mission backs away from the bowl and drives 60 cm into the open middle of the room before Nav2 takes over.
