@@ -1,4 +1,4 @@
-# 13 · Putting it all together: pick and place
+# 13 · Pick and place
 
 <p class="tutorial-meta">⏱ 45 min · Level: intermediate · Script: <code>isaac/13_all_together.py</code> · ROS: <code>lime_full.launch.py</code>, <code>mission</code></p>
 
@@ -118,7 +118,8 @@ source scripts/isaac_env.sh
 python isaac/13_all_together.py
 ```
 
-Terminal 2, the ROS 2 stack (wait for *"Managed nodes are active"* and *"You can start planning now!"*):
+Terminal 2, the ROS 2 stack and RViz (wait for *"Managed nodes are active"* and *"You can start planning now!"*;
+add `rviz:=false` to leave RViz out):
 
 ```bash
 ./scripts/build_ws.sh
@@ -132,13 +133,13 @@ Terminal 3, the mission (the first start downloads `yolo11m.pt`, about 40 MB, in
 ```
 
 ```text
-YOLO: banana (0.88) at (0.75, -0.11), bowl (0.69) at (0.96, 0.41)
+YOLO: banana (0.88) at (0.75, -0.11), bowl (0.70) at (0.96, 0.41)
 YOLO: banana (0.92) at (0.792, -0.123), pointing 19 deg
 MoveIt: above the banana: done
 MoveIt: down to the banana: done
 MoveIt: lift: done
 MoveIt: carry: done
-YOLO: bowl (0.68) at (0.998, 0.377), radius 9 cm
+YOLO: bowl (0.67) at (0.998, 0.377), radius 9 cm
 MoveIt: above the bowl: done
 MoveIt: arm folded: done
 Nav2: parking at (2.8, -1.8)
@@ -291,21 +292,21 @@ goal stays active, and the next gripper command (open, above the bowl) replaces 
 
 ```text
 [13] ground truth: banana at [ 0.8   -0.121], bowl at [1.  0.4]
-[13] banana lifted (10 cm above the floor) at t = 46 s
-[13] banana in the bowl, 4.3 cm from its centre at t = 70 s
-[13] arm folded at t = 71 s
-[13] robot parked in the far corner at t = 95 s
+[13] banana lifted (10 cm above the floor) at t = 47 s
+[13] banana in the bowl, 4.9 cm from its centre at t = 71 s
+[13] arm folded at t = 73 s
+[13] robot parked in the far corner at t = 98 s
 [13][check] ok   banana picked up (more than 10 cm above the floor)
 [13][check] ok   banana put into the bowl (within 7 cm of its centre)
 [13][check] ok   arm folded afterwards
 [13][check] ok   robot parked in the far corner (within 0.3 m)
-[13][check] ok   banana still in the bowl at the end (4.3 cm from its centre)
+[13][check] ok   banana still in the bowl at the end (4.9 cm from its centre)
 [13][check] ok   mug not bumped into (moved 0.0 cm)
 [13][check] ok   bottle not bumped into (moved 0.0 cm)
 [13][test] PASS
 ```
 
-The banana lands about 4 cm from the bowl's centre, short of it, because the stretched-out arm reaches only
+The banana lands about 5 cm from the bowl's centre, short of it, because the stretched-out arm reaches only
 18 cm in front of the robot at that height (joint5's limit). The bowl's radius is 12 cm.
 
 ## Things that went wrong while building this (and the fixes)
@@ -322,6 +323,7 @@ The banana lands about 4 cm from the bowl's centre, short of it, because the str
 | The mug crept across the floor by itself | its convex-hull collider (the mug's mesh has a flat base, so the hull is the culprit, not the model) | `convexDecomposition` for the mug |
 | The robot drove through the mustard bottle on its way to park | the bottle had no collider, and Nav2 started right next to it | colliders for the mug and the bottle, and drive into the open before Nav2 takes over |
 | MoveIt: `Start state out of bounds … joint3` after driving | the folded pose (`joint3` = 1.85) sagged onto the joint limit (1.8567) | fold to `joint3` = 1.80 (tutorial 03's start pose and the SRDF) |
+| Now and then the mission hung right at the start, after *"amcl/get_state service not available, waiting..."* | right after a service appears, DDS may not have matched both sides yet, and the first request is lost. `BasicNavigator.waitUntilNav2Active()` then waits for the answer forever | `wait_until_nav2_active()` in `mission.py`: the same, with a 2 s timeout per request, and retries |
 
 ## Where to go from here
 
@@ -350,6 +352,5 @@ The banana lands about 4 cm from the bowl's centre, short of it, because the str
     --8<-- "ros2_ws/src/lime_isaac_bringup/scripts/mission.py"
     ```
 
-**Next:** [14 · Make your own map with SLAM](14-slam.md)
-
-Happy simulating! 🍋
+**Next:** [14 · Make your own map with SLAM](14-slam.md). Tutorial 16 builds on this one: three bananas the robot
+has to find first, all run by a behavior tree.

@@ -249,7 +249,7 @@ so the pose may be off by a cell or two. Without `scan_fix` and with scans every
 | RViz: *"Frame [map] does not exist"* | slam_toolbox publishes `map` after its first scan: is `/scan` arriving, and is the simulation playing? |
 | `map_saver_cli` times out | It needs a running slam_toolbox, and sim time (`use_sim_time:=true`). |
 | Something you moved away is still in the map | It was there when you mapped. Clear the floor and map again, or paint the spot white (free) in the `.pgm` with an image editor. |
-| Nav2 drives into something low | Anything lower than the LiDAR's plane (16 cm) is in neither your map nor the costmaps (part 4). Draw it into the `.pgm` (black), or add a depth camera to the costmaps. |
+| Nav2 drives into something low | Anything lower than the LiDAR's plane (16 cm) is in neither your map nor the costmaps (part 4). Draw it into the `.pgm` (black), or add a depth camera to the costmaps ([tutorial 16](16-tidy-room.md)). |
 | The map is wrong after you restart Isaac Sim | Restart slam_toolbox too: simulation time went back to 0. |
 
-**Back to:** [Home](../index.md)
+**Next:** [15 · Behavior trees](15-behavior-trees.md)

@@ -59,7 +59,10 @@ def generate_launch_description():
     spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_state_broadcaster", "arm_controller", "gripper_controller", "--controller-manager-timeout", "60"],
+        # --switch-timeout: activating the controllers takes longer than the default 5 s when the PC is busy
+        # (Isaac Sim, YOLO and RViz at once); the spawner would give up and leave the arm without controllers
+        arguments=["joint_state_broadcaster", "arm_controller", "gripper_controller", "--controller-manager-timeout", "60",
+                   "--switch-timeout", "30"],
         parameters=[sim_time],
         output="screen",
     )

@@ -129,6 +129,7 @@ running it:
 | `No acceleration limit was defined for joint joint1` | Jazzy's time parameterization needs acceleration limits | own `joint_limits.yaml` with `max_acceleration` |
 | "SUCCESS" although the arm did not move | without goal tolerances, a trajectory controller reports success when the time is over | `arm_controller.constraints.<joint>.goal: 0.05` |
 | Gripper "stalled at 0.0" immediately | stall detection fired before the finger started | `stall_timeout: 2.0`, `stall_velocity_threshold: 0.0005` |
+| Seen once: `Switch controller timed out after 5 seconds!`, the spawner dies, and MoveIt has no arm or gripper controller | activating the controllers took longer than the spawner's default 5 s (the PC was busy: Isaac Sim, YOLO and RViz at once) | `--switch-timeout 30` for the spawner in `moveit.launch.py` |
 
 !!! warning "Only one simulation at a time"
     Two running Isaac Sim instances both publish `/clock`. Every ROS node then sees time jumping back and forth
@@ -147,4 +148,4 @@ running it:
 
 `tools/run_all_checks.sh 12` starts MoveIt and `arm_demo` in the container for you.
 
-**Next:** [13 · Putting it all together](13-all-together.md)
+**Next:** [13 · Pick and place](13-all-together.md)

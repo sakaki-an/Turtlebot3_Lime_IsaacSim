@@ -70,6 +70,13 @@ RUN pip3 install --no-cache-dir --break-system-packages \
  && pip3 uninstall -y --break-system-packages opencv-python || true \
  && pip3 install --no-cache-dir --break-system-packages "opencv-python-headless<4.12" "numpy<2"
 
+# Behavior trees in Python (tutorials 15 and 16). Nav2's own behavior trees (BehaviorTree.CPP) come with
+# ros-jazzy-navigation2 above. (A separate layer, so adding it did not rebuild the layers above.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ros-jazzy-py-trees \
+      ros-jazzy-py-trees-ros \
+    && rm -rf /var/lib/apt/lists/*
+
 # DDS profile shared with the host (UDP only: shared memory does not cross the container boundary
 # reliably). The repository is mounted at /lime by docker/run_ros.sh, so both sides read the same file.
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp \

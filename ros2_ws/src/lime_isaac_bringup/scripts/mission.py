@@ -117,6 +117,7 @@ class Lime:
         depth = self.depth.get((msg.header.stamp.sec, msg.header.stamp.nanosec))
         if depth is not None:
             self.detections.append((msg, depth))
+            del self.detections[:-60]  # the last 60 only (each holds a depth image)
 
     def spin_for(self, seconds):
         end = time.time() + seconds
@@ -145,6 +146,11 @@ class Lime:
         if best is None or self.K is None:
             return None
         score, det, header, depth_msg = best
+        pts, camera = self.points(det, header, depth_msg)
+        return None if pts is None else {"score": score, "points": pts, "camera": camera}
+
+    def points(self, det, header, depth_msg):
+        """The 3D points (odom frame) of one detection's box, and where the camera was. (None, None) if too few."""
         depth = np.frombuffer(depth_msg.data, dtype=np.float32).reshape(depth_msg.height, depth_msg.width)
         cx, cy = det.bbox.center.position.x, det.bbox.center.position.y
         w, h = det.bbox.size_x, det.bbox.size_y
@@ -161,10 +167,10 @@ class Lime:
         pts = cam @ R.T + np.array([t.x, t.y, t.z])
         pts = pts[(pts[:, 2] > 0.006) & (pts[:, 2] < 0.40)]  # drop the floor (z = 0) around the object
         if len(pts) < 20:
-            return None
+            return None, None
         middle = np.median(pts[:, :2], axis=0)
         pts = pts[np.linalg.norm(pts[:, :2] - middle, axis=1) < 0.25]  # drop the background inside the box
-        return {"score": score, "points": pts, "camera": np.array([t.x, t.y])}
+        return pts, np.array([t.x, t.y])
     # --8<-- [end:locate]
 
     # --8<-- [start:base]
@@ -266,6 +272,30 @@ class Lime:
         return self.wait(self.scene.call_async(request)).success
 
 
+def wait_until_nav2_active(nav):
+    """BasicNavigator.waitUntilNav2Active(), but with a timeout on every service call, and retries.
+
+    Right after a service appears, DDS may not have finished matching both sides, and the first request can get
+    lost. The original then waits for its answer forever (it happened twice in about 25 runs)."""
+    from lifecycle_msgs.srv import GetState
+
+    for node in ("amcl", "bt_navigator"):
+        client = nav.create_client(GetState, f"{node}/get_state")
+        while True:
+            if not client.wait_for_service(timeout_sec=1.0):
+                nav.info(f"{node}/get_state service not available, waiting...")
+                continue
+            future = client.call_async(GetState.Request())
+            rclpy.spin_until_future_complete(nav, future, timeout_sec=2.0)
+            if future.done() and future.result() is not None and future.result().current_state.label == "active":
+                break
+            time.sleep(1.0)  # not active yet, or the answer got lost: ask again
+        nav.destroy_client(client)
+        if node == "amcl":
+            nav._waitForInitialPose()  # BasicNavigator's own: (re)publish the initial pose until AMCL has it
+    nav.info("Nav2 is ready for use!")
+
+
 def quat_to_matrix(x, y, z, w):
     return np.array(
         [
@@ -322,7 +352,7 @@ def main():
     p.header.stamp = lime.nav.get_clock().now().to_msg()
     p.pose.orientation.w = 1.0
     lime.nav.setInitialPose(p)  # the robot starts at the map origin
-    lime.nav.waitUntilNav2Active()
+    wait_until_nav2_active(lime.nav)
     if not (lime.arm.wait_for_server(timeout_sec=60.0) and lime.grip.wait_for_server(timeout_sec=60.0)):
         fail("MoveIt / gripper action servers not available")
     lime.add_floor()

@@ -13,6 +13,7 @@ physics, and give a clean occupancy map for Nav2 (tutorial 11).
     build_lime_room(stage, object_physics=True)   # ... with real objects: colliders and mass (tutorial 13)
     build_lime_room(stage, with_objects=False)    # ... with the floor cleared (tutorials 11 and 14)
     add_traffic_cone(stage)         # tutorial 11: an obstacle that is not in the map
+    setup_tidy_room(stage)          # tutorial 16: mug and bottle out of the way, two more bananas (hidden)
     python isaac/common/scene.py    # (re)writes assets/scenes/lime_room.usda for the GUI tutorials
 """
 
@@ -43,16 +44,19 @@ OBJECTS = [
 CONE_ASSET = "/Isaac/Environments/Simple_Warehouse/Props/S_TrafficCone.usd"
 CONE_XY = (1.2, -0.3)
 
+# Tutorial 16: two more bananas (x, y, yaw deg), hidden from the robot's start: behind the pillar, behind the divider
+MORE_BANANAS = [
+    ("Banana2", 2.70, -1.70, -60.0),
+    ("Banana3", 1.60, 2.05, 10.0),
+]
+# ... and the mug and the bottle out of the way, towards the corners: not in the way, but still for the robot to
+# find and check (each is within 2 m of a lookout)
+TIDY_MOVES = {"Mug": (-1.2, -1.4), "Bottle": (3.4, 0.9)}
+
 
 def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = True, object_physics: bool = False):
-    import math
-
     from isaacsim.core.experimental.objects import Cube, GroundPlane
-    from isaacsim.core.experimental.prims import XformPrim
-    from isaacsim.storage.native import get_assets_root_path
     from pxr import Gf, UsdGeom, UsdLux, UsdPhysics
-
-    import isaacsim.core.experimental.utils.stage as stage_utils
 
     UsdGeom.Xform.Define(stage, root)
     GroundPlane(f"{root}/GroundPlane")
@@ -78,19 +82,29 @@ def build_lime_room(stage, root: str = "/World/LimeRoom", with_objects: bool = T
         box(name, cx, cy, sx, sy, sz, [0.95, 0.55, 0.15])
 
     if with_objects:
-        assets = get_assets_root_path()
         for name, rel, x, y, yaw, half_height, up, _coco in OBJECTS:
-            path = f"{root}/Objects/{name}"
-            stage_utils.add_reference_to_stage(assets + rel, path)
-            cx, sx = math.sqrt(0.5), up * math.sqrt(0.5)  # +-90 deg about X
-            cz, sz = math.cos(math.radians(yaw) / 2), math.sin(math.radians(yaw) / 2)  # yaw about Z
-            # quaternion (w, x, y, z) of "first +-90 deg about X, then yaw about Z"
-            XformPrim(path, reset_xform_op_properties=True).set_world_poses(
-                positions=[[x, y, half_height + 0.002]], orientations=[[cz * cx, cz * sx, sz * sx, sz * cx]]
-            )
+            _place_ycb(f"{root}/Objects/{name}", rel, x, y, yaw, half_height, up)
         if object_physics:
             add_object_physics(stage, root)
     return root
+
+
+def _place_ycb(path: str, rel: str, x: float, y: float, yaw: float, half_height: float, up: int):
+    """Reference one YCB object and stand it on the floor at (x, y), turned by yaw (deg)."""
+    import math
+
+    from isaacsim.core.experimental.prims import XformPrim
+    from isaacsim.storage.native import get_assets_root_path
+
+    import isaacsim.core.experimental.utils.stage as stage_utils
+
+    stage_utils.add_reference_to_stage(get_assets_root_path() + rel, path)
+    cx, sx = math.sqrt(0.5), up * math.sqrt(0.5)  # +-90 deg about X
+    cz, sz = math.cos(math.radians(yaw) / 2), math.sin(math.radians(yaw) / 2)  # yaw about Z
+    # quaternion (w, x, y, z) of "first +-90 deg about X, then yaw about Z"
+    XformPrim(path, reset_xform_op_properties=True).set_world_poses(
+        positions=[[x, y, half_height + 0.002]], orientations=[[cz * cx, cz * sx, sz * sx, sz * cx]]
+    )
 
 
 # --8<-- [start:add_traffic_cone]
@@ -150,6 +164,39 @@ def add_object_physics(stage, root: str = "/World/LimeRoom"):
     PhysxSchema.PhysxRigidBodyAPI.Apply(banana).CreateSolverPositionIterationCountAttr(32)
     colliders(stage.GetPrimAtPath(f"{root}/Objects/Bowl"), "none")
 # --8<-- [end:add_object_physics]
+
+
+# --8<-- [start:setup_tidy_room]
+def setup_tidy_room(stage, root: str = "/World/LimeRoom") -> list[str]:
+    """Tutorial 16: move the mug and the bottle out of the way (TIDY_MOVES), and add two more bananas, real
+    ones like the first (66 g, convex decomposition, rubber-like friction). Call it after setup_pick_and_place(),
+    which makes the rubber material. Returns the paths of all three bananas."""
+    from isaacsim.core.experimental.prims import XformPrim
+    from pxr import PhysxSchema, Usd, UsdGeom, UsdPhysics, UsdShade
+
+    for name, (x, y) in TIDY_MOVES.items():
+        prim = XformPrim(f"{root}/Objects/{name}")
+        position, orientation = prim.get_world_poses()
+        prim.set_world_poses(positions=[[x, y, float(position.numpy()[0, 2])]], orientations=orientation)
+
+    _name, rel, _x, _y, _yaw, half_height, up, _coco = next(o for o in OBJECTS if o[0] == "Banana")
+    rubber = UsdShade.Material(stage.GetPrimAtPath(f"{root}/PhysicsMaterials/rubber"))
+    paths = [f"{root}/Objects/Banana"]
+    for name, x, y, yaw in MORE_BANANAS:
+        path = f"{root}/Objects/{name}"
+        _place_ycb(path, rel, x, y, yaw, half_height, up)
+        prim = stage.GetPrimAtPath(path)
+        UsdPhysics.RigidBodyAPI.Apply(prim)
+        UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(0.066)  # kg
+        for p in Usd.PrimRange(prim):
+            if p.IsA(UsdGeom.Mesh):
+                UsdPhysics.CollisionAPI.Apply(p)
+                UsdPhysics.MeshCollisionAPI.Apply(p).CreateApproximationAttr("convexDecomposition")
+        PhysxSchema.PhysxRigidBodyAPI.Apply(prim).CreateSolverPositionIterationCountAttr(32)
+        UsdShade.MaterialBindingAPI.Apply(prim).Bind(rubber, UsdShade.Tokens.weakerThanDescendants, "physics")
+        paths.append(path)
+    return paths
+# --8<-- [end:setup_tidy_room]
 
 
 # --8<-- [start:setup_pick_and_place]

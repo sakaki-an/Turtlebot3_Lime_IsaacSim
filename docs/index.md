@@ -21,9 +21,9 @@ frame names, so what you build in simulation is meant to carry over to the hardw
 
 <figure class="result" markdown>
 <video controls autoplay loop muted playsinline>
-  <source src="assets/video/tutorial13_all_together.mp4" type="video/mp4">
+  <source src="assets/video/tutorial16_tidy.mp4" type="video/mp4">
 </video>
-<figcaption>The final tutorial: YOLO and the depth camera find the banana, MoveIt picks it up and puts it into the bowl, and Nav2 parks the Lime. Everything simulated in Isaac Sim 6.2 and controlled from ROS 2 Jazzy.</figcaption>
+<figcaption>The final tutorial: the Lime tidies the room. Nav2 drives it from lookout to lookout, the depth camera finds what is on the floor, YOLO tells the bananas from the mug and the bottle, MoveIt picks up all three bananas and puts them into the bowl, and a behavior tree decides what to do next. Everything simulated in Isaac Sim 6.2 and controlled from ROS 2 Jazzy.</figcaption>
 </figure>
 
 ## How each tutorial works
@@ -64,8 +64,10 @@ Each tutorial has two ways to do the same thing:
 | 10 | [Object detection with YOLO](tutorials/10-yolo.md) | a ROS 2 YOLO node on simulated images, `vision_msgs/Detection2DArray` |
 | 11 | [Navigation with Nav2](tutorials/11-nav2.md) | occupancy map from the scene, Jazzy Nav2 parameters for the Lime, AMCL, goals, a traffic cone that is not in the map |
 | 12 | [Arm control with MoveIt 2](tutorials/12-moveit2.md) | ros2_control over topics, MoveIt 2 on Jazzy, planning from RViz and Python |
-| 13 | [Putting it all together: pick and place](tutorials/13-all-together.md) | everything at once: YOLO + depth find the banana, MoveIt 2 picks it up and puts it into the bowl, Nav2 parks |
+| 13 | [Pick and place](tutorials/13-all-together.md) | the whole robot at once: YOLO + depth find the banana, MoveIt 2 picks it up and puts it into the bowl, Nav2 parks |
 | 14 | [Make your own map with SLAM](tutorials/14-slam.md) | slam_toolbox maps the room from the LiDAR; Isaac Sim's −1 "no return"; grade the map against the truth |
+| 15 | [Behavior trees](tutorials/15-behavior-trees.md) | the tree inside Nav2; your own tree with py_trees: a patrol that a low battery interrupts |
+| 16 | [All together: tidy the room](tutorials/16-tidy-room.md) | a real job: find three bananas (depth camera + map), check things with YOLO, pick and place each one, all run by a behavior tree |
 
 Every tutorial was run on Isaac Sim 6.2 and checked with its `--test` mode (`tools/run_all_checks.sh`).
 
