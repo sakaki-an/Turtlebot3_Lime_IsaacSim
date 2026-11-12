@@ -8,7 +8,7 @@ contains the ros2_control block). /joint_states comes from joint_state_broadcast
 """
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -20,17 +20,24 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("rviz", default_value="true"),
-            # MoveIt 2 + ros2_control (+ robot_state_publisher)
-            IncludeLaunchDescription(
-                PathJoinSubstitution([FindPackageShare("lime_isaac_moveit"), "launch", "moveit.launch.py"]),
-                launch_arguments={"rviz": "false"}.items(),
+            DeclareLaunchArgument("params_file", default_value=PathJoinSubstitution([pkg, "config", "nav2_params.yaml"])),
+            # MoveIt 2 + ros2_control (+ robot_state_publisher). In a scoped group: otherwise its rviz:=false
+            # would leak out and switch off the RViz below as well.
+            GroupAction(
+                [
+                    IncludeLaunchDescription(
+                        PathJoinSubstitution([FindPackageShare("lime_isaac_moveit"), "launch", "moveit.launch.py"]),
+                        launch_arguments={"rviz": "false"}.items(),
+                    )
+                ],
+                scoped=True,
             ),
             # Nav2 (map_server, AMCL, planner, controller, ...)
             IncludeLaunchDescription(
                 PathJoinSubstitution([FindPackageShare("nav2_bringup"), "launch", "bringup_launch.py"]),
                 launch_arguments={
                     "map": PathJoinSubstitution([pkg, "maps", "lime_room.yaml"]),
-                    "params_file": PathJoinSubstitution([pkg, "config", "nav2_params.yaml"]),
+                    "params_file": LaunchConfiguration("params_file"),
                     "use_sim_time": "true",
                     "autostart": "true",
                 }.items(),

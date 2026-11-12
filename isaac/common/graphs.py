@@ -5,6 +5,7 @@ Each function builds exactly the graph explained step by step in an earlier tuto
   * create_drive_graph()  - tutorial 06: /cmd_vel -> Differential Controller -> wheels
   * create_odom_tf_joint_states_graph() - tutorial 07: /odom, TF odom->base_footprint, /joint_states
   * create_camera_graph()   - tutorial 08: RGB, depth, camera_info
+  * create_depth_cloud_graph() - tutorial 16: a small point cloud from the depth camera, for Nav2's costmaps
   * create_lidar_graph()    - tutorial 09: /scan
   * create_imu_graph()      - tutorial 09: /imu
   * create_joint_command_graph() - tutorial 12: /isaac_joint_commands -> arm + gripper joints
@@ -224,6 +225,52 @@ def create_camera_graph(
         },
     )
 # --8<-- [end:create_camera_graph]
+
+
+# --8<-- [start:create_depth_cloud_graph]
+def create_depth_cloud_graph(
+    camera_path: str,
+    width: int = 160,
+    height: int = 120,
+    every_nth_frame: int = 6,
+    graph_path: str = "/World/ROS2_DepthCloud",
+    topic: str = "/camera/camera/depth/color/points",  # realsense2_camera's topic name
+    frame_id: str = "camera_color_optical_frame",
+):
+    """Tutorial 16: the depth camera as a point cloud (sensor_msgs/PointCloud2), for Nav2's costmaps.
+
+    A second, small render product of the same camera (160 x 120 = 19,200 points instead of 307,200),
+    published on every 6th frame (10 Hz): plenty for a costmap with 5 cm cells, light for DDS.
+    """
+    import usdrt.Sdf
+
+    og = _og()
+    keys = og.Controller.Keys
+    og.Controller.edit(
+        {"graph_path": graph_path, "evaluator_name": "execution"},
+        {
+            keys.CREATE_NODES: [
+                ("OnPlaybackTick", "omni.graph.action.OnPlaybackTick"),
+                ("RenderProduct", "isaacsim.core.nodes.IsaacCreateRenderProduct"),
+                ("PublishCloud", "isaacsim.ros2.bridge.ROS2CameraHelper"),
+            ],
+            keys.SET_VALUES: [
+                ("RenderProduct.inputs:cameraPrim", [usdrt.Sdf.Path(camera_path)]),
+                ("RenderProduct.inputs:width", width),
+                ("RenderProduct.inputs:height", height),
+                ("PublishCloud.inputs:type", "depth_pcl"),
+                ("PublishCloud.inputs:topicName", topic),
+                ("PublishCloud.inputs:frameId", frame_id),
+                ("PublishCloud.inputs:frameSkipCount", every_nth_frame - 1),
+            ],
+            keys.CONNECT: [
+                ("OnPlaybackTick.outputs:tick", "RenderProduct.inputs:execIn"),
+                ("RenderProduct.outputs:execOut", "PublishCloud.inputs:execIn"),
+                ("RenderProduct.outputs:renderProductPath", "PublishCloud.inputs:renderProductPath"),
+            ],
+        },
+    )
+# --8<-- [end:create_depth_cloud_graph]
 
 
 # --8<-- [start:create_lidar_graph]

@@ -108,7 +108,7 @@ inside the container with ROS 2 sourced. Later calls reuse the running container
 
 ??? note "Want ROS 2 natively instead of Docker? (not tested here)"
     These tutorials were verified only with the container. On Ubuntu 24.04 you can install the same packages the Dockerfile installs:
-    `sudo apt install ros-jazzy-desktop ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox ros-jazzy-moveit ros-jazzy-ros2-control ros-jazzy-ros2-controllers ros-jazzy-gripper-controllers ros-jazzy-joint-state-topic-hardware-interface ros-jazzy-xacro ros-jazzy-realsense2-description ros-jazzy-vision-msgs ros-jazzy-cv-bridge ros-jazzy-teleop-twist-keyboard`.
+    `sudo apt install ros-jazzy-desktop ros-jazzy-navigation2 ros-jazzy-nav2-bringup ros-jazzy-slam-toolbox ros-jazzy-moveit ros-jazzy-ros2-control ros-jazzy-ros2-controllers ros-jazzy-gripper-controllers ros-jazzy-joint-state-topic-hardware-interface ros-jazzy-xacro ros-jazzy-realsense2-description ros-jazzy-vision-msgs ros-jazzy-cv-bridge ros-jazzy-teleop-twist-keyboard ros-jazzy-py-trees ros-jazzy-py-trees-ros`.
     Then use the same `ROS_DOMAIN_ID`, `RMW_IMPLEMENTATION` and Fast DDS profile as `scripts/isaac_env.sh`.
     Never source `/opt/ros/jazzy` in the terminal that runs Isaac Sim.
 

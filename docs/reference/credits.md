@@ -12,8 +12,10 @@ This project is released under the **Apache License 2.0** (see `LICENSE` and `NO
 | [realsense-ros](https://github.com/IntelRealSense/realsense-ros) `realsense2_description` | D435 camera mesh (`assets/urdf/meshes/d435.dae`) | Apache-2.0 |
 | [NVIDIA Isaac Sim 6.2](https://docs.isaacsim.omniverse.nvidia.com/6.2.0/) | the simulator, installed by you via pip | NVIDIA license (not redistributed here) |
 | [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/), Nav2, MoveIt 2, ros2_control | the ROS side, in the Docker container | Apache-2.0 / BSD |
-| [nav2_bringup](https://github.com/ros-navigation/navigation2/tree/jazzy/nav2_bringup) | `nav2_params.yaml` is generated from its Jazzy defaults; `navigation.rviz` is a modified copy of its RViz config | Apache-2.0 |
+| [nav2_bringup](https://github.com/ros-navigation/navigation2/tree/jazzy/nav2_bringup) | `nav2_params.yaml` is generated from its Jazzy defaults (`nav2_params_tidy.yaml`: the same plus tutorial 16's changes); `navigation.rviz` is a modified copy of its RViz config | Apache-2.0 |
 | [slam_toolbox](https://github.com/SteveMacenski/slam_toolbox) | SLAM in tutorial 14; `slam_params.yaml` is generated from its Jazzy `mapper_params_online_async.yaml` | LGPL-2.1 |
+| [py_trees](https://github.com/splintered-reality/py_trees) | the behavior trees of tutorials 15 and 16 (`ros-jazzy-py-trees`, in the container) | BSD-3-Clause |
+| [Nav2](https://github.com/ros-navigation/navigation2/tree/jazzy/nav2_bt_navigator/behavior_trees) `navigate_to_pose_w_replanning_and_recovery.xml` | quoted in tutorial 15 | Apache-2.0 |
 | [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) | object detection in `lime_yolo` (installed in the container, not redistributed) | AGPL-3.0 |
 | [MkDocs](https://www.mkdocs.org/) + [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) | this website | BSD-2 / MIT |
 

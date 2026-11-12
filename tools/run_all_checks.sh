@@ -120,6 +120,18 @@ check_with_ros 14nav isaac/11_nav2.py "" \
    for i in $(seq 1 90); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/nav2.log && break; sleep 1; done; sleep 5
    timeout 200 ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 3.2, y: -1.8}, orientation: {w: 1.0}}}}"' 600 11
 
+# 15: the patrol, a behavior tree, in tutorial 11's world (Nav2 only).
+check_with_ros 15 isaac/15_behavior_tree.py tutorial15_patrol \
+  'ros2 launch lime_isaac_bringup navigation.launch.py rviz:=false > /tmp/lime_home/nav2.log 2>&1 &
+   for i in $(seq 1 90); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/nav2.log && break; sleep 1; done; sleep 5
+   timeout 600 ros2 run lime_isaac_bringup patrol' 800
+
+# 16: tidy the room - everything, run by a behavior tree.
+check_with_ros 16 isaac/16_tidy_room.py tutorial16_tidy \
+  'ros2 launch lime_isaac_bringup tidy.launch.py rviz:=false > /tmp/lime_home/tidy.log 2>&1 &
+   for i in $(seq 1 150); do grep -a -q "lifecycle_manager_navigation.*Managed nodes are active" /tmp/lime_home/tidy.log && grep -a -q "You can start planning now" /tmp/lime_home/tidy.log && break; sleep 1; done; sleep 5
+   timeout 2700 ros2 run lime_isaac_bringup tidy' 3000
+
 echo
 echo "=== Summary ==="
 fail=0
