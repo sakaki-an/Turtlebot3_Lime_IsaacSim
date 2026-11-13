@@ -41,7 +41,7 @@ Then follow the [tutorials](https://sakaki-an.github.io/Turtlebot3_Lime_IsaacSim
 | 00 | Setup | `isaac/00_check_setup.py` |
 | 01 | Isaac Sim basics & Hello World | `isaac/01_hello_world.py` |
 | 02 | Import TurtleBot3 Lime (URDF → USD) | `isaac/02_import_urdf.py` |
-| 03 | Tune the robot (drives, friction, solver) | `isaac/03_tune_robot.py` |
+| 03 | Tune the robot (drives, friction, solver), before and after | `isaac/03_tune_robot.py`, `isaac/03_before_after.py` |
 | 04 | Move it from Python (Articulation API) | `isaac/04_hello_robot.py` |
 | 05 | Your first Action Graph (keyboard driving) | `isaac/05_action_graph.py` |
 | 06 | Drive with ROS 2 `/cmd_vel` (Action Graph) | `isaac/06_ros2_drive.py` |

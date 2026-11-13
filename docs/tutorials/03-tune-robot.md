@@ -1,6 +1,6 @@
 # 03 · Tune the robot
 
-<p class="tutorial-meta">⏱ 25 min · Level: beginner → intermediate · Script: <code>isaac/03_tune_robot.py</code></p>
+<p class="tutorial-meta">⏱ 25 min · Level: beginner → intermediate · Scripts: <code>isaac/03_tune_robot.py</code>, <code>isaac/03_before_after.py</code></p>
 
 **Goal.** Make the imported Lime simulate well. The arm should hold its pose, the wheels should follow
 velocity commands, the casters should slide, and the gripper should open and close. Then make it **look like the
@@ -8,9 +8,13 @@ real robot**. The tuning goes into its own USD file, so a re-import never loses 
 
 <figure class="result" markdown>
 <video controls autoplay loop muted playsinline>
-  <source src="../../assets/video/tutorial03_tuned.mp4" type="video/mp4">
+  <source src="../../assets/video/tutorial03_before_after.mp4" type="video/mp4">
 </video>
-<figcaption>Tuned: the arm holds the folded "home" pose, the robot drives 0.87 m in 3 s at 5 rad/s (ideal 0.90 m), and the gripper opens.</figcaption>
+<figcaption>Before and after, the same test for both: wait 2 s, both wheels at 5 rad/s for 3 s, open the gripper.
+<b>Left</b>, the robot as tutorial 02 imported it (given only a wheel drive, so that its wheels can turn at all): the
+arm falls over, the robot covers about 0.25 m and turns about 18°, and the gripper stays shut.
+<b>Right</b>, tuned: the arm holds the folded "home" pose, the robot drives 0.87 m straight (ideal 0.90 m), and the
+gripper opens.</figcaption>
 </figure>
 
 ## Concepts
@@ -54,6 +58,11 @@ Measured on the final tuned asset (both wheels at 5 rad/s for 3 s, ideal distanc
 
 The second row confirms the cause: removing friction at the caster–floor contact fixes the problem.
 The third row fixes it without touching the floor.
+
+The robot on the left of the video at the top drives even less, about 0.25 m. Its caster pads have no physics
+material at all, so they keep PhysX's default friction instead of 0. Give that robot only the caster material
+(friction 0, combine *min*), with its arm still fallen over and its cylinder tyres, and it drives 0.86 m in the
+same test.
 
 ### Wheel colliders: cylinder vs sphere
 
@@ -214,12 +223,64 @@ treats more, and it prints a warning.
 - 5 rad/s × 0.06 m = 0.30 m/s, so 0.90 m in 3 s. The missing 2.6 cm is the acceleration phase.
 - The right finger copies the left one exactly: the mimic joint works under PhysX.
 
-![Tuned robot](../assets/img/tutorial03_tuned.png){ .full }
+<figure class="result" markdown>
+<video controls autoplay loop muted playsinline>
+  <source src="../../assets/video/tutorial03_tuned.mp4" type="video/mp4">
+</video>
+<figcaption><code>03_tune_robot.py</code> with the tuned robot: the arm holds, the robot drives, the gripper opens.</figcaption>
+</figure>
 
 !!! tip "Experiment"
     Change `ARM_DRIVE = dict(stiffness=200.0, ...)` to `stiffness=20.0` and re-run: the arm sags.
     Change the caster combine mode back to `"average"`: the robot covers only about 0.67 m, curves, and the
     distance test fails.
+
+### Before and after, side by side
+
+`isaac/03_before_after.py` makes the video at the top of this page. It puts the imported robot next to the tuned
+one and runs the same test on both. It only reads the two assets, so run `03_tune_robot.py` first.
+
+```bash
+python isaac/03_before_after.py                     # with a window
+python isaac/03_before_after.py --headless --test
+```
+
+The left robot is the asset exactly as tutorial 02 imported it:
+
+```python
+--8<-- "isaac/03_before_after.py:robots"
+```
+
+with one change. Its wheel drives have no damping, so a speed command would do nothing at all. The script gives
+them the tuned robot's damping, in the running simulation only:
+
+```python
+--8<-- "isaac/03_before_after.py:one_change"
+```
+
+```text
+[03vs] as imported : arm moved 1.819 rad in 2 s, drove 0.251 m (sideways +0.044 m, turned +17.5 deg), wheels 3.06 / 1.26 rad/s, gripper 1.1 mm
+[03vs] tuned       : arm moved 0.001 rad in 2 s, drove 0.874 m (sideways +0.001 m, turned +0.1 deg), wheels 5.00 / 5.01 rad/s, gripper 19.0 mm
+[03vs][check] ok   tuned: arm holds its pose (moved 0.001 rad)
+[03vs][check] ok   tuned: drove 0.87 m (ideal 0.90 m)
+[03vs][check] ok   tuned: gripper open (19.0 mm)
+[03vs][check] ok   as imported: arm falls (moved 1.82 rad)
+[03vs][check] ok   as imported: gripper does not open (1.1 mm)
+[03vs][test] PASS
+```
+
+- The imported arm has no stiffness, so it falls over by about 105° in the first 2 s.
+- The imported wheels turn at only about 3 and 1 rad/s instead of 5, and the robot covers a quarter of a metre
+  and veers. The caster pads cause it (see [Friction and combine modes](#friction-and-combine-modes)).
+- The imported gripper has no drive, so the command to open it does nothing.
+- The left robot's drive is sensitive to small changes in the scene: moving the robots by a few centimetres gave
+  0.23–0.25 m and 17–19°. So the check tests only its arm and gripper. The tuned robot must pass the same test
+  as above.
+
+??? example "Full script: `isaac/03_before_after.py`"
+    ```python
+    --8<-- "isaac/03_before_after.py"
+    ```
 
 From now on every tutorial loads **`assets/usd/turtlebot3_lime_tuned.usda`**. In Python that is
 `common.lime.add_lime()`.
