@@ -65,6 +65,7 @@ check 01 isaac/01_hello_world.py tutorial01_hello_world
 # 02 imports into _out/ so the committed asset in assets/usd/ (and git history) stays untouched.
 check 02 "isaac/02_import_urdf.py --out _out/import_check" tutorial02_import 1200
 check 03 isaac/03_tune_robot.py tutorial03_tuned
+check 03vs isaac/03_before_after.py tutorial03_before_after  # reads the tuned asset that 03 just wrote
 check 04 isaac/04_hello_robot.py tutorial04_hello_robot
 check 05 isaac/05_action_graph.py tutorial05_action_graph
 check_with_ros 06 isaac/06_ros2_drive.py tutorial06_ros2_drive \
